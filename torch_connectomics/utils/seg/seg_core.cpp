@@ -599,8 +599,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__vcg_connectomics__utils__seg__seg_core
-#define __PYX_HAVE_API__vcg_connectomics__utils__seg__seg_core
+#define __PYX_HAVE__torch_connectomics__utils__seg__seg_core
+#define __PYX_HAVE_API__torch_connectomics__utils__seg__seg_core
 /* Early includes */
 #include <string.h>
 #include <stdio.h>
@@ -843,7 +843,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "vcg_connectomics/utils/seg/seg_core.pyx",
+  "torch_connectomics/utils/seg/seg_core.pyx",
   "__init__.pxd",
   "stringsource",
   "type.pxd",
@@ -2197,7 +2197,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, cha
 
 /* Module declarations from 'libc.stdint' */
 
-/* Module declarations from 'vcg_connectomics.utils.seg.seg_core' */
+/* Module declarations from 'torch_connectomics.utils.seg.seg_core' */
 static PyTypeObject *__pyx_array_type = 0;
 static PyTypeObject *__pyx_MemviewEnum_type = 0;
 static PyTypeObject *__pyx_memoryview_type = 0;
@@ -2247,11 +2247,11 @@ static __Pyx_TypeInfo __Pyx_TypeInfo_long = { "long", NULL, sizeof(long), { 0 },
 static __Pyx_TypeInfo __Pyx_TypeInfo_int = { "int", NULL, sizeof(int), { 0 }, 0, IS_UNSIGNED(int) ? 'U' : 'I', IS_UNSIGNED(int), 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn_uint64_t = { "uint64_t", NULL, sizeof(uint64_t), { 0 }, 0, IS_UNSIGNED(uint64_t) ? 'U' : 'I', IS_UNSIGNED(uint64_t), 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_float = { "float", NULL, sizeof(float), { 0 }, 0, 'R', 0, 0 };
-#define __Pyx_MODULE_NAME "vcg_connectomics.utils.seg.seg_core"
-extern int __pyx_module_is_main_vcg_connectomics__utils__seg__seg_core;
-int __pyx_module_is_main_vcg_connectomics__utils__seg__seg_core = 0;
+#define __Pyx_MODULE_NAME "torch_connectomics.utils.seg.seg_core"
+extern int __pyx_module_is_main_torch_connectomics__utils__seg__seg_core;
+int __pyx_module_is_main_torch_connectomics__utils__seg__seg_core = 0;
 
-/* Implementation of 'vcg_connectomics.utils.seg.seg_core' */
+/* Implementation of 'torch_connectomics.utils.seg.seg_core' */
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_RuntimeError;
@@ -2432,12 +2432,12 @@ static const char __pyx_k_got_differing_extents_in_dimensi[] = "got differing ex
 static const char __pyx_k_ndarray_is_not_Fortran_contiguou[] = "ndarray is not Fortran contiguous";
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
 static const char __pyx_k_numpy_core_umath_failed_to_impor[] = "numpy.core.umath failed to import";
+static const char __pyx_k_torch_connectomics_utils_seg_aff[] = "torch_connectomics.utils.seg.aff_util";
+static const char __pyx_k_torch_connectomics_utils_seg_seg[] = "torch_connectomics.utils.seg.seg_util";
 static const char __pyx_k_unable_to_allocate_shape_and_str[] = "unable to allocate shape and strides.";
-static const char __pyx_k_vcg_connectomics_utils_seg_aff_u[] = "vcg_connectomics.utils.seg.aff_util";
-static const char __pyx_k_vcg_connectomics_utils_seg_seg_c[] = "vcg_connectomics/utils/seg/seg_core.pyx";
-static const char __pyx_k_vcg_connectomics_utils_seg_seg_u[] = "vcg_connectomics.utils.seg.seg_util";
 static const char __pyx_k_Format_string_allocated_too_shor_2[] = "Format string allocated too short.";
-static const char __pyx_k_vcg_connectomics_utils_seg_seg_c_2[] = "vcg_connectomics.utils.seg.seg_core";
+static const char __pyx_k_torch_connectomics_utils_seg_seg_2[] = "torch_connectomics/utils/seg/seg_core.pyx";
+static const char __pyx_k_torch_connectomics_utils_seg_seg_3[] = "torch_connectomics.utils.seg.seg_core";
 static PyObject *__pyx_n_s_ASCII;
 static PyObject *__pyx_kp_s_Buffer_view_does_not_expose_stri;
 static PyObject *__pyx_kp_s_Can_only_create_a_buffer_that_is;
@@ -2600,6 +2600,10 @@ static PyObject *__pyx_n_s_thresholded_segmentation;
 static PyObject *__pyx_n_s_tmp_components;
 static PyObject *__pyx_n_s_tmp_mapping;
 static PyObject *__pyx_n_s_tmp_segmentation;
+static PyObject *__pyx_n_s_torch_connectomics_utils_seg_aff;
+static PyObject *__pyx_n_s_torch_connectomics_utils_seg_seg;
+static PyObject *__pyx_kp_s_torch_connectomics_utils_seg_seg_2;
+static PyObject *__pyx_n_s_torch_connectomics_utils_seg_seg_3;
 static PyObject *__pyx_n_s_uint64;
 static PyObject *__pyx_kp_s_unable_to_allocate_array_data;
 static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
@@ -2608,22 +2612,18 @@ static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
 static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_updated_segmentation;
-static PyObject *__pyx_n_s_vcg_connectomics_utils_seg_aff_u;
-static PyObject *__pyx_kp_s_vcg_connectomics_utils_seg_seg_c;
-static PyObject *__pyx_n_s_vcg_connectomics_utils_seg_seg_c_2;
-static PyObject *__pyx_n_s_vcg_connectomics_utils_seg_seg_u;
 static PyObject *__pyx_n_s_xres;
 static PyObject *__pyx_n_s_yres;
 static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_n_s_zres;
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_gold, PyObject *__pyx_v_low_threshold, PyObject *__pyx_v_high_threshold); /* proto */
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_mapping); /* proto */
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallConnectedComponents(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_threshold); /* proto */
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnectivity(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation); /* proto */
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_renum(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_seg, int __pyx_v_sizeThreshold); /* proto */
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_watershed(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_marker, PyArrayObject *__pyx_v_node1, PyArrayObject *__pyx_v_node2, PyArrayObject *__pyx_v_edgeWeight, int __pyx_v_sizeThreshold); /* proto */
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_components_affgraph(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_aff, PyObject *__pyx_v_nhood); /* proto */
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_components(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_nVert, PyArrayObject *__pyx_v_node1, PyArrayObject *__pyx_v_node2, PyArrayObject *__pyx_v_edgeWeight, int __pyx_v_sizeThreshold); /* proto */
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_Mapping(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_gold, PyObject *__pyx_v_low_threshold, PyObject *__pyx_v_high_threshold); /* proto */
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_2MapLabels(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_mapping); /* proto */
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_4RemoveSmallConnectedComponents(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_threshold); /* proto */
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_6ForceConnectivity(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation); /* proto */
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_8prune_and_renum(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_seg, int __pyx_v_sizeThreshold); /* proto */
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_10marker_watershed(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_marker, PyArrayObject *__pyx_v_node1, PyArrayObject *__pyx_v_node2, PyArrayObject *__pyx_v_edgeWeight, int __pyx_v_sizeThreshold); /* proto */
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_12connected_components_affgraph(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_aff, PyObject *__pyx_v_nhood); /* proto */
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_14connected_components(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_nVert, PyArrayObject *__pyx_v_node1, PyArrayObject *__pyx_v_node2, PyArrayObject *__pyx_v_edgeWeight, int __pyx_v_sizeThreshold); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -2732,7 +2732,7 @@ static PyObject *__pyx_codeobj__49;
 static PyObject *__pyx_codeobj__56;
 /* Late includes */
 
-/* "vcg_connectomics/utils/seg/seg_core.pyx":31
+/* "torch_connectomics/utils/seg/seg_core.pyx":31
  * 
  * ## 1. seg2gold
  * def Mapping(segmentation, gold, low_threshold=0.10, high_threshold=0.80):             # <<<<<<<<<<<<<<
@@ -2741,9 +2741,9 @@ static PyObject *__pyx_codeobj__56;
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_1Mapping(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_1Mapping = {"Mapping", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_1Mapping, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_1Mapping(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_1Mapping(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_1Mapping = {"Mapping", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_1Mapping, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_1Mapping(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_segmentation = 0;
   PyObject *__pyx_v_gold = 0;
   PyObject *__pyx_v_low_threshold = 0;
@@ -2819,18 +2819,18 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_1Mapping(PyOb
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("Mapping", 0, 2, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 31, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.Mapping", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.Mapping", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(__pyx_self, __pyx_v_segmentation, __pyx_v_gold, __pyx_v_low_threshold, __pyx_v_high_threshold);
+  __pyx_r = __pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_Mapping(__pyx_self, __pyx_v_segmentation, __pyx_v_gold, __pyx_v_low_threshold, __pyx_v_high_threshold);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_gold, PyObject *__pyx_v_low_threshold, PyObject *__pyx_v_high_threshold) {
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_Mapping(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_gold, PyObject *__pyx_v_low_threshold, PyObject *__pyx_v_high_threshold) {
   PyArrayObject *__pyx_v_cpp_segmentation = 0;
   PyArrayObject *__pyx_v_cpp_gold = 0;
   CYTHON_UNUSED PyObject *__pyx_v_max_segmentation = NULL;
@@ -2875,7 +2875,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
   __pyx_pybuffernd_cpp_gold.data = NULL;
   __pyx_pybuffernd_cpp_gold.rcbuffer = &__pyx_pybuffer_cpp_gold;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":33
+  /* "torch_connectomics/utils/seg/seg_core.pyx":33
  * def Mapping(segmentation, gold, low_threshold=0.10, high_threshold=0.80):
  *     cdef np.ndarray[long, ndim=3, mode='c'] cpp_segmentation
  *     cpp_segmentation = np.ascontiguousarray(segmentation, dtype=ctypes.c_int64)             # <<<<<<<<<<<<<<
@@ -2929,7 +2929,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
   __pyx_v_cpp_segmentation = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":35
+  /* "torch_connectomics/utils/seg/seg_core.pyx":35
  *     cpp_segmentation = np.ascontiguousarray(segmentation, dtype=ctypes.c_int64)
  *     cdef np.ndarray[int, ndim=3, mode='c'] cpp_gold
  *     cpp_gold = np.ascontiguousarray(gold, dtype=ctypes.c_int32)             # <<<<<<<<<<<<<<
@@ -2983,7 +2983,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
   __pyx_v_cpp_gold = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":37
+  /* "torch_connectomics/utils/seg/seg_core.pyx":37
  *     cpp_gold = np.ascontiguousarray(gold, dtype=ctypes.c_int32)
  * 
  *     max_segmentation = np.amax(segmentation) + 1             # <<<<<<<<<<<<<<
@@ -3016,7 +3016,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
   __pyx_v_max_segmentation = __pyx_t_5;
   __pyx_t_5 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":39
+  /* "torch_connectomics/utils/seg/seg_core.pyx":39
  *     max_segmentation = np.amax(segmentation) + 1
  * 
  *     cdef long *mapping = CppMapping(&(cpp_segmentation[0,0,0]), &(cpp_gold[0,0,0]), segmentation.size, low_threshold, high_threshold)             # <<<<<<<<<<<<<<
@@ -3071,7 +3071,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
   __pyx_t_20 = __pyx_PyFloat_AsDouble(__pyx_v_high_threshold); if (unlikely((__pyx_t_20 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 39, __pyx_L1_error)
   __pyx_v_mapping = CppMapping((&(*__Pyx_BufPtrCContig3d(long *, __pyx_pybuffernd_cpp_segmentation.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_cpp_segmentation.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_cpp_segmentation.diminfo[1].strides, __pyx_t_14, __pyx_pybuffernd_cpp_segmentation.diminfo[2].strides))), (&(*__Pyx_BufPtrCContig3d(int *, __pyx_pybuffernd_cpp_gold.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_cpp_gold.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_cpp_gold.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_cpp_gold.diminfo[2].strides))), __pyx_t_18, __pyx_t_19, __pyx_t_20);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":41
+  /* "torch_connectomics/utils/seg/seg_core.pyx":41
  *     cdef long *mapping = CppMapping(&(cpp_segmentation[0,0,0]), &(cpp_gold[0,0,0]), segmentation.size, low_threshold, high_threshold)
  * 
  *     cdef long[:] tmp_mapping = <long[:max_segmentation]> mapping;             # <<<<<<<<<<<<<<
@@ -3100,7 +3100,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
   __pyx_t_23.memview = NULL;
   __pyx_t_23.data = NULL;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":43
+  /* "torch_connectomics/utils/seg/seg_core.pyx":43
  *     cdef long[:] tmp_mapping = <long[:max_segmentation]> mapping;
  * 
  *     return np.asarray(tmp_mapping)             # <<<<<<<<<<<<<<
@@ -3135,7 +3135,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":31
+  /* "torch_connectomics/utils/seg/seg_core.pyx":31
  * 
  * ## 1. seg2gold
  * def Mapping(segmentation, gold, low_threshold=0.10, high_threshold=0.80):             # <<<<<<<<<<<<<<
@@ -3159,7 +3159,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_cpp_gold.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_cpp_segmentation.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.Mapping", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.Mapping", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -3175,7 +3175,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
   return __pyx_r;
 }
 
-/* "vcg_connectomics/utils/seg/seg_core.pyx":47
+/* "torch_connectomics/utils/seg/seg_core.pyx":47
  * ## 2. seg2seg
  * # map the labels from this segmentation
  * def MapLabels(segmentation, mapping):             # <<<<<<<<<<<<<<
@@ -3184,9 +3184,9 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_Mapping(CYTHO
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_3MapLabels(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_3MapLabels = {"MapLabels", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_3MapLabels, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_3MapLabels(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_3MapLabels(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_3MapLabels = {"MapLabels", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_3MapLabels, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_3MapLabels(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_segmentation = 0;
   PyObject *__pyx_v_mapping = 0;
   PyObject *__pyx_r = 0;
@@ -3234,18 +3234,18 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_3MapLabels(Py
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("MapLabels", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 47, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.MapLabels", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.MapLabels", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(__pyx_self, __pyx_v_segmentation, __pyx_v_mapping);
+  __pyx_r = __pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_2MapLabels(__pyx_self, __pyx_v_segmentation, __pyx_v_mapping);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_mapping) {
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_2MapLabels(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_mapping) {
   PyObject *__pyx_v_zres = NULL;
   PyObject *__pyx_v_yres = NULL;
   PyObject *__pyx_v_xres = NULL;
@@ -3291,7 +3291,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
   __pyx_pybuffernd_cpp_mapping.data = NULL;
   __pyx_pybuffernd_cpp_mapping.rcbuffer = &__pyx_pybuffer_cpp_mapping;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":49
+  /* "torch_connectomics/utils/seg/seg_core.pyx":49
  * def MapLabels(segmentation, mapping):
  *     # get the size of the data
  *     zres, yres, xres = segmentation.shape             # <<<<<<<<<<<<<<
@@ -3360,7 +3360,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
   __pyx_v_xres = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":50
+  /* "torch_connectomics/utils/seg/seg_core.pyx":50
  *     # get the size of the data
  *     zres, yres, xres = segmentation.shape
  *     nentries = segmentation.size             # <<<<<<<<<<<<<<
@@ -3372,7 +3372,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
   __pyx_v_nentries = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":53
+  /* "torch_connectomics/utils/seg/seg_core.pyx":53
  * 
  *     cdef np.ndarray[long, ndim=3, mode='c'] cpp_segmentation
  *     cpp_segmentation = np.ascontiguousarray(segmentation, dtype=ctypes.c_int64)             # <<<<<<<<<<<<<<
@@ -3426,7 +3426,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
   __pyx_v_cpp_segmentation = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":55
+  /* "torch_connectomics/utils/seg/seg_core.pyx":55
  *     cpp_segmentation = np.ascontiguousarray(segmentation, dtype=ctypes.c_int64)
  *     cdef np.ndarray[long, ndim=1, mode='c'] cpp_mapping
  *     cpp_mapping = np.ascontiguousarray(mapping, dtype=ctypes.c_int64)             # <<<<<<<<<<<<<<
@@ -3480,7 +3480,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
   __pyx_v_cpp_mapping = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":57
+  /* "torch_connectomics/utils/seg/seg_core.pyx":57
  *     cpp_mapping = np.ascontiguousarray(mapping, dtype=ctypes.c_int64)
  * 
  *     cdef long *mapped_segmentation = CppMapLabels(&(cpp_segmentation[0,0,0]), &(cpp_mapping[0]), nentries)             # <<<<<<<<<<<<<<
@@ -3520,7 +3520,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
   __pyx_t_17 = __Pyx_PyInt_As_unsigned_long(__pyx_v_nentries); if (unlikely((__pyx_t_17 == (unsigned long)-1) && PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L1_error)
   __pyx_v_mapped_segmentation = CppMapLabels((&(*__Pyx_BufPtrCContig3d(long *, __pyx_pybuffernd_cpp_segmentation.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_cpp_segmentation.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_cpp_segmentation.diminfo[1].strides, __pyx_t_15, __pyx_pybuffernd_cpp_segmentation.diminfo[2].strides))), (&(*__Pyx_BufPtrCContig1d(long *, __pyx_pybuffernd_cpp_mapping.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_cpp_mapping.diminfo[0].strides))), __pyx_t_17);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":59
+  /* "torch_connectomics/utils/seg/seg_core.pyx":59
  *     cdef long *mapped_segmentation = CppMapLabels(&(cpp_segmentation[0,0,0]), &(cpp_mapping[0]), nentries)
  * 
  *     cdef long[:] tmp_segmentation = <long[:segmentation.size]> mapped_segmentation             # <<<<<<<<<<<<<<
@@ -3551,7 +3551,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
   __pyx_t_20.memview = NULL;
   __pyx_t_20.data = NULL;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":61
+  /* "torch_connectomics/utils/seg/seg_core.pyx":61
  *     cdef long[:] tmp_segmentation = <long[:segmentation.size]> mapped_segmentation
  * 
  *     return np.reshape(np.asarray(tmp_segmentation), (zres, yres, xres))             # <<<<<<<<<<<<<<
@@ -3651,7 +3651,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":47
+  /* "torch_connectomics/utils/seg/seg_core.pyx":47
  * ## 2. seg2seg
  * # map the labels from this segmentation
  * def MapLabels(segmentation, mapping):             # <<<<<<<<<<<<<<
@@ -3676,7 +3676,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_cpp_mapping.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_cpp_segmentation.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.MapLabels", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.MapLabels", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -3695,7 +3695,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
   return __pyx_r;
 }
 
-/* "vcg_connectomics/utils/seg/seg_core.pyx":66
+/* "torch_connectomics/utils/seg/seg_core.pyx":66
  * 
  * # remove the components less than min size
  * def RemoveSmallConnectedComponents(segmentation, threshold=64):             # <<<<<<<<<<<<<<
@@ -3704,9 +3704,9 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_2MapLabels(CY
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents = {"RemoveSmallConnectedComponents", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents = {"RemoveSmallConnectedComponents", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_segmentation = 0;
   PyObject *__pyx_v_threshold = 0;
   PyObject *__pyx_r = 0;
@@ -3758,18 +3758,18 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_5RemoveSmallC
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("RemoveSmallConnectedComponents", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 66, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.RemoveSmallConnectedComponents", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.RemoveSmallConnectedComponents", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallConnectedComponents(__pyx_self, __pyx_v_segmentation, __pyx_v_threshold);
+  __pyx_r = __pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_4RemoveSmallConnectedComponents(__pyx_self, __pyx_v_segmentation, __pyx_v_threshold);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallConnectedComponents(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_threshold) {
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_4RemoveSmallConnectedComponents(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation, PyObject *__pyx_v_threshold) {
   PyObject *__pyx_v_nentries = NULL;
   PyObject *__pyx_v_zres = NULL;
   PyObject *__pyx_v_yres = NULL;
@@ -3808,7 +3808,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
   __pyx_pybuffernd_cpp_segmentation.data = NULL;
   __pyx_pybuffernd_cpp_segmentation.rcbuffer = &__pyx_pybuffer_cpp_segmentation;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":67
+  /* "torch_connectomics/utils/seg/seg_core.pyx":67
  * # remove the components less than min size
  * def RemoveSmallConnectedComponents(segmentation, threshold=64):
  *     if threshold == 0: return segmentation             # <<<<<<<<<<<<<<
@@ -3826,7 +3826,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
     goto __pyx_L0;
   }
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":69
+  /* "torch_connectomics/utils/seg/seg_core.pyx":69
  *     if threshold == 0: return segmentation
  * 
  *     nentries = segmentation.size             # <<<<<<<<<<<<<<
@@ -3838,7 +3838,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
   __pyx_v_nentries = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":70
+  /* "torch_connectomics/utils/seg/seg_core.pyx":70
  * 
  *     nentries = segmentation.size
  *     zres, yres, xres = segmentation.shape             # <<<<<<<<<<<<<<
@@ -3907,7 +3907,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
   __pyx_v_xres = __pyx_t_5;
   __pyx_t_5 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":73
+  /* "torch_connectomics/utils/seg/seg_core.pyx":73
  * 
  *     cdef np.ndarray[long, ndim=3, mode='c'] cpp_segmentation
  *     cpp_segmentation = np.ascontiguousarray(segmentation, dtype=ctypes.c_int64)             # <<<<<<<<<<<<<<
@@ -3961,7 +3961,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
   __pyx_v_cpp_segmentation = ((PyArrayObject *)__pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":76
+  /* "torch_connectomics/utils/seg/seg_core.pyx":76
  * 
  *     # call the c++ function
  *     cdef long *updated_segmentation = CppRemoveSmallConnectedComponents(&(cpp_segmentation[0,0,0]), threshold, nentries)             # <<<<<<<<<<<<<<
@@ -3992,7 +3992,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
   __pyx_t_16 = __Pyx_PyInt_As_unsigned_long(__pyx_v_nentries); if (unlikely((__pyx_t_16 == (unsigned long)-1) && PyErr_Occurred())) __PYX_ERR(0, 76, __pyx_L1_error)
   __pyx_v_updated_segmentation = CppRemoveSmallConnectedComponents((&(*__Pyx_BufPtrCContig3d(long *, __pyx_pybuffernd_cpp_segmentation.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_cpp_segmentation.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_cpp_segmentation.diminfo[1].strides, __pyx_t_15, __pyx_pybuffernd_cpp_segmentation.diminfo[2].strides))), __pyx_t_9, __pyx_t_16);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":79
+  /* "torch_connectomics/utils/seg/seg_core.pyx":79
  * 
  *     # turn into python numpy array
  *     cdef long[:] tmp_segmentation = <long[:segmentation.size]> updated_segmentation             # <<<<<<<<<<<<<<
@@ -4023,7 +4023,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
   __pyx_t_19.memview = NULL;
   __pyx_t_19.data = NULL;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":82
+  /* "torch_connectomics/utils/seg/seg_core.pyx":82
  * 
  *     # reshape the array to the original shape
  *     thresholded_segmentation = np.reshape(np.asarray(tmp_segmentation), (zres, yres, xres))             # <<<<<<<<<<<<<<
@@ -4121,7 +4121,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
   __pyx_v_thresholded_segmentation = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":83
+  /* "torch_connectomics/utils/seg/seg_core.pyx":83
  *     # reshape the array to the original shape
  *     thresholded_segmentation = np.reshape(np.asarray(tmp_segmentation), (zres, yres, xres))
  *     return np.copy(thresholded_segmentation)             # <<<<<<<<<<<<<<
@@ -4153,7 +4153,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":66
+  /* "torch_connectomics/utils/seg/seg_core.pyx":66
  * 
  * # remove the components less than min size
  * def RemoveSmallConnectedComponents(segmentation, threshold=64):             # <<<<<<<<<<<<<<
@@ -4177,7 +4177,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_cpp_segmentation.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.RemoveSmallConnectedComponents", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.RemoveSmallConnectedComponents", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -4195,7 +4195,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
   return __pyx_r;
 }
 
-/* "vcg_connectomics/utils/seg/seg_core.pyx":87
+/* "torch_connectomics/utils/seg/seg_core.pyx":87
  * 
  * 
  * def ForceConnectivity(segmentation):             # <<<<<<<<<<<<<<
@@ -4204,20 +4204,20 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_4RemoveSmallC
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_7ForceConnectivity(PyObject *__pyx_self, PyObject *__pyx_v_segmentation); /*proto*/
-static PyMethodDef __pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_7ForceConnectivity = {"ForceConnectivity", (PyCFunction)__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_7ForceConnectivity, METH_O, 0};
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_7ForceConnectivity(PyObject *__pyx_self, PyObject *__pyx_v_segmentation) {
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_7ForceConnectivity(PyObject *__pyx_self, PyObject *__pyx_v_segmentation); /*proto*/
+static PyMethodDef __pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_7ForceConnectivity = {"ForceConnectivity", (PyCFunction)__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_7ForceConnectivity, METH_O, 0};
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_7ForceConnectivity(PyObject *__pyx_self, PyObject *__pyx_v_segmentation) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ForceConnectivity (wrapper)", 0);
-  __pyx_r = __pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnectivity(__pyx_self, ((PyObject *)__pyx_v_segmentation));
+  __pyx_r = __pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_6ForceConnectivity(__pyx_self, ((PyObject *)__pyx_v_segmentation));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnectivity(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation) {
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_6ForceConnectivity(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segmentation) {
   PyArrayObject *__pyx_v_cpp_segmentation = 0;
   PyObject *__pyx_v_zres = NULL;
   PyObject *__pyx_v_yres = NULL;
@@ -4257,7 +4257,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
   __pyx_pybuffernd_cpp_segmentation.data = NULL;
   __pyx_pybuffernd_cpp_segmentation.rcbuffer = &__pyx_pybuffer_cpp_segmentation;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":90
+  /* "torch_connectomics/utils/seg/seg_core.pyx":90
  *     # transform into c array
  *     cdef np.ndarray[long, ndim=3, mode='c'] cpp_segmentation
  *     cpp_segmentation = np.ascontiguousarray(segmentation, dtype=ctypes.c_int64)             # <<<<<<<<<<<<<<
@@ -4311,7 +4311,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
   __pyx_v_cpp_segmentation = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":91
+  /* "torch_connectomics/utils/seg/seg_core.pyx":91
  *     cdef np.ndarray[long, ndim=3, mode='c'] cpp_segmentation
  *     cpp_segmentation = np.ascontiguousarray(segmentation, dtype=ctypes.c_int64)
  *     zres, yres, xres = segmentation.shape             # <<<<<<<<<<<<<<
@@ -4380,7 +4380,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
   __pyx_v_xres = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":94
+  /* "torch_connectomics/utils/seg/seg_core.pyx":94
  * 
  *     # call the c++ function
  *     cdef long *cpp_components = CppForceConnectivity(&(cpp_segmentation[0,0,0]), zres, yres, xres)             # <<<<<<<<<<<<<<
@@ -4412,7 +4412,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
   __pyx_t_17 = __Pyx_PyInt_As_long(__pyx_v_xres); if (unlikely((__pyx_t_17 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 94, __pyx_L1_error)
   __pyx_v_cpp_components = CppForceConnectivity((&(*__Pyx_BufPtrCContig3d(long *, __pyx_pybuffernd_cpp_segmentation.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_cpp_segmentation.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_cpp_segmentation.diminfo[1].strides, __pyx_t_14, __pyx_pybuffernd_cpp_segmentation.diminfo[2].strides))), __pyx_t_15, __pyx_t_16, __pyx_t_17);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":97
+  /* "torch_connectomics/utils/seg/seg_core.pyx":97
  * 
  *     # turn into python numpy array
  *     cdef long[:] tmp_components = <long[:zres*yres*xres]> cpp_components             # <<<<<<<<<<<<<<
@@ -4449,7 +4449,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
   __pyx_t_20.memview = NULL;
   __pyx_t_20.data = NULL;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":100
+  /* "torch_connectomics/utils/seg/seg_core.pyx":100
  * 
  *     # reshape the array to the original shape
  *     components = np.reshape(np.asarray(tmp_components), (zres, yres, xres)).astype(np.int32)             # <<<<<<<<<<<<<<
@@ -4571,7 +4571,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
   __pyx_v_components = __pyx_t_5;
   __pyx_t_5 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":103
+  /* "torch_connectomics/utils/seg/seg_core.pyx":103
  * 
  *     # find which segments have multiple components
  *     return components             # <<<<<<<<<<<<<<
@@ -4583,7 +4583,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
   __pyx_r = __pyx_v_components;
   goto __pyx_L0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":87
+  /* "torch_connectomics/utils/seg/seg_core.pyx":87
  * 
  * 
  * def ForceConnectivity(segmentation):             # <<<<<<<<<<<<<<
@@ -4608,7 +4608,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_cpp_segmentation.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.ForceConnectivity", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.ForceConnectivity", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -4625,7 +4625,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
   return __pyx_r;
 }
 
-/* "vcg_connectomics/utils/seg/seg_core.pyx":105
+/* "torch_connectomics/utils/seg/seg_core.pyx":105
  *     return components
  * 
  * def prune_and_renum(np.ndarray[uint64_t,ndim=1] seg,             # <<<<<<<<<<<<<<
@@ -4634,9 +4634,9 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_6ForceConnect
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_9prune_and_renum(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_9prune_and_renum = {"prune_and_renum", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_9prune_and_renum, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_9prune_and_renum(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_9prune_and_renum(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_9prune_and_renum = {"prune_and_renum", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_9prune_and_renum, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_9prune_and_renum(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_seg = 0;
   int __pyx_v_sizeThreshold;
   PyObject *__pyx_r = 0;
@@ -4691,12 +4691,12 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_9prune_and_re
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("prune_and_renum", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 105, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.prune_and_renum", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.prune_and_renum", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_seg), __pyx_ptype_5numpy_ndarray, 1, "seg", 0))) __PYX_ERR(0, 105, __pyx_L1_error)
-  __pyx_r = __pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_renum(__pyx_self, __pyx_v_seg, __pyx_v_sizeThreshold);
+  __pyx_r = __pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_8prune_and_renum(__pyx_self, __pyx_v_seg, __pyx_v_sizeThreshold);
 
   /* function exit code */
   goto __pyx_L0;
@@ -4707,7 +4707,7 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_9prune_and_re
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_renum(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_seg, int __pyx_v_sizeThreshold) {
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_8prune_and_renum(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_seg, int __pyx_v_sizeThreshold) {
   PyObject *__pyx_v_segId = NULL;
   PyObject *__pyx_v_segSizes = NULL;
   PyObject *__pyx_v_descOrder = NULL;
@@ -4741,7 +4741,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   }
   __pyx_pybuffernd_seg.diminfo[0].strides = __pyx_pybuffernd_seg.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_seg.diminfo[0].shape = __pyx_pybuffernd_seg.rcbuffer->pybuffer.shape[0];
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":108
+  /* "torch_connectomics/utils/seg/seg_core.pyx":108
  *                     int sizeThreshold=1):
  *     # renumber the components in descending order by size
  *     segId,segSizes = np.unique(seg, return_counts=True)             # <<<<<<<<<<<<<<
@@ -4817,7 +4817,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   __pyx_v_segSizes = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":109
+  /* "torch_connectomics/utils/seg/seg_core.pyx":109
  *     # renumber the components in descending order by size
  *     segId,segSizes = np.unique(seg, return_counts=True)
  *     descOrder = np.argsort(segSizes)[::-1]             # <<<<<<<<<<<<<<
@@ -4850,7 +4850,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   __pyx_v_descOrder = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":110
+  /* "torch_connectomics/utils/seg/seg_core.pyx":110
  *     segId,segSizes = np.unique(seg, return_counts=True)
  *     descOrder = np.argsort(segSizes)[::-1]
  *     renum = np.zeros(int(segId.max()+1),dtype=np.uint64)             # <<<<<<<<<<<<<<
@@ -4907,7 +4907,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   __pyx_v_renum = __pyx_t_6;
   __pyx_t_6 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":111
+  /* "torch_connectomics/utils/seg/seg_core.pyx":111
  *     descOrder = np.argsort(segSizes)[::-1]
  *     renum = np.zeros(int(segId.max()+1),dtype=np.uint64)
  *     segId = segId[descOrder]             # <<<<<<<<<<<<<<
@@ -4919,7 +4919,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   __Pyx_DECREF_SET(__pyx_v_segId, __pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":112
+  /* "torch_connectomics/utils/seg/seg_core.pyx":112
  *     renum = np.zeros(int(segId.max()+1),dtype=np.uint64)
  *     segId = segId[descOrder]
  *     segSizes = segSizes[descOrder]             # <<<<<<<<<<<<<<
@@ -4931,7 +4931,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   __Pyx_DECREF_SET(__pyx_v_segSizes, __pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":113
+  /* "torch_connectomics/utils/seg/seg_core.pyx":113
  *     segId = segId[descOrder]
  *     segSizes = segSizes[descOrder]
  *     renum[segId] = np.arange(1,len(segId)+1)             # <<<<<<<<<<<<<<
@@ -4996,7 +4996,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   if (unlikely(PyObject_SetItem(__pyx_v_renum, __pyx_v_segId, __pyx_t_6) < 0)) __PYX_ERR(0, 113, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":115
+  /* "torch_connectomics/utils/seg/seg_core.pyx":115
  *     renum[segId] = np.arange(1,len(segId)+1)
  * 
  *     if sizeThreshold>0:             # <<<<<<<<<<<<<<
@@ -5006,7 +5006,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   __pyx_t_9 = ((__pyx_v_sizeThreshold > 0) != 0);
   if (__pyx_t_9) {
 
-    /* "vcg_connectomics/utils/seg/seg_core.pyx":116
+    /* "torch_connectomics/utils/seg/seg_core.pyx":116
  * 
  *     if sizeThreshold>0:
  *         renum[segId[segSizes<=sizeThreshold]] = 0             # <<<<<<<<<<<<<<
@@ -5023,7 +5023,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
     if (unlikely(PyObject_SetItem(__pyx_v_renum, __pyx_t_6, __pyx_int_0) < 0)) __PYX_ERR(0, 116, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "vcg_connectomics/utils/seg/seg_core.pyx":117
+    /* "torch_connectomics/utils/seg/seg_core.pyx":117
  *     if sizeThreshold>0:
  *         renum[segId[segSizes<=sizeThreshold]] = 0
  *         segSizes = segSizes[segSizes>sizeThreshold]             # <<<<<<<<<<<<<<
@@ -5040,7 +5040,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
     __Pyx_DECREF_SET(__pyx_v_segSizes, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "vcg_connectomics/utils/seg/seg_core.pyx":115
+    /* "torch_connectomics/utils/seg/seg_core.pyx":115
  *     renum[segId] = np.arange(1,len(segId)+1)
  * 
  *     if sizeThreshold>0:             # <<<<<<<<<<<<<<
@@ -5049,7 +5049,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
  */
   }
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":119
+  /* "torch_connectomics/utils/seg/seg_core.pyx":119
  *         segSizes = segSizes[segSizes>sizeThreshold]
  * 
  *     seg = renum[seg]             # <<<<<<<<<<<<<<
@@ -5081,7 +5081,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   __Pyx_DECREF_SET(__pyx_v_seg, ((PyArrayObject *)__pyx_t_6));
   __pyx_t_6 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":120
+  /* "torch_connectomics/utils/seg/seg_core.pyx":120
  * 
  *     seg = renum[seg]
  *     return (seg, segSizes)             # <<<<<<<<<<<<<<
@@ -5101,7 +5101,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":105
+  /* "torch_connectomics/utils/seg/seg_core.pyx":105
  *     return components
  * 
  * def prune_and_renum(np.ndarray[uint64_t,ndim=1] seg,             # <<<<<<<<<<<<<<
@@ -5122,7 +5122,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_seg.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.prune_and_renum", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.prune_and_renum", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -5138,7 +5138,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
   return __pyx_r;
 }
 
-/* "vcg_connectomics/utils/seg/seg_core.pyx":122
+/* "torch_connectomics/utils/seg/seg_core.pyx":122
  *     return (seg, segSizes)
  * 
  * def marker_watershed(np.ndarray[uint64_t,ndim=1] marker,             # <<<<<<<<<<<<<<
@@ -5147,9 +5147,9 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_8prune_and_re
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_11marker_watershed(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_11marker_watershed = {"marker_watershed", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_11marker_watershed, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_11marker_watershed(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_11marker_watershed(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_11marker_watershed = {"marker_watershed", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_11marker_watershed, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_11marker_watershed(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_marker = 0;
   PyArrayObject *__pyx_v_node1 = 0;
   PyArrayObject *__pyx_v_node2 = 0;
@@ -5237,7 +5237,7 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_11marker_wate
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("marker_watershed", 0, 4, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 122, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.marker_watershed", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.marker_watershed", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
@@ -5245,7 +5245,7 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_11marker_wate
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_node1), __pyx_ptype_5numpy_ndarray, 1, "node1", 0))) __PYX_ERR(0, 123, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_node2), __pyx_ptype_5numpy_ndarray, 1, "node2", 0))) __PYX_ERR(0, 124, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_edgeWeight), __pyx_ptype_5numpy_ndarray, 1, "edgeWeight", 0))) __PYX_ERR(0, 125, __pyx_L1_error)
-  __pyx_r = __pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_watershed(__pyx_self, __pyx_v_marker, __pyx_v_node1, __pyx_v_node2, __pyx_v_edgeWeight, __pyx_v_sizeThreshold);
+  __pyx_r = __pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_10marker_watershed(__pyx_self, __pyx_v_marker, __pyx_v_node1, __pyx_v_node2, __pyx_v_edgeWeight, __pyx_v_sizeThreshold);
 
   /* function exit code */
   goto __pyx_L0;
@@ -5256,7 +5256,7 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_11marker_wate
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_watershed(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_marker, PyArrayObject *__pyx_v_node1, PyArrayObject *__pyx_v_node2, PyArrayObject *__pyx_v_edgeWeight, int __pyx_v_sizeThreshold) {
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_10marker_watershed(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_marker, PyArrayObject *__pyx_v_node1, PyArrayObject *__pyx_v_node2, PyArrayObject *__pyx_v_edgeWeight, int __pyx_v_sizeThreshold) {
   int __pyx_v_nVert;
   int __pyx_v_nEdge;
   PyArrayObject *__pyx_v_seg = 0;
@@ -5339,7 +5339,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
   }
   __pyx_pybuffernd_edgeWeight.diminfo[0].strides = __pyx_pybuffernd_edgeWeight.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_edgeWeight.diminfo[0].shape = __pyx_pybuffernd_edgeWeight.rcbuffer->pybuffer.shape[0];
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":127
+  /* "torch_connectomics/utils/seg/seg_core.pyx":127
  *                      np.ndarray[float,ndim=1] edgeWeight,
  *                      int sizeThreshold=1):
  *     cdef int nVert = marker.shape[0]             # <<<<<<<<<<<<<<
@@ -5348,7 +5348,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
  */
   __pyx_v_nVert = (__pyx_v_marker->dimensions[0]);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":128
+  /* "torch_connectomics/utils/seg/seg_core.pyx":128
  *                      int sizeThreshold=1):
  *     cdef int nVert = marker.shape[0]
  *     cdef int nEdge = node1.shape[0]             # <<<<<<<<<<<<<<
@@ -5357,7 +5357,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
  */
   __pyx_v_nEdge = (__pyx_v_node1->dimensions[0]);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":129
+  /* "torch_connectomics/utils/seg/seg_core.pyx":129
  *     cdef int nVert = marker.shape[0]
  *     cdef int nEdge = node1.shape[0]
  *     marker = np.ascontiguousarray(marker)             # <<<<<<<<<<<<<<
@@ -5407,7 +5407,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
   __Pyx_DECREF_SET(__pyx_v_marker, ((PyArrayObject *)__pyx_t_1));
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":130
+  /* "torch_connectomics/utils/seg/seg_core.pyx":130
  *     cdef int nEdge = node1.shape[0]
  *     marker = np.ascontiguousarray(marker)
  *     node1 = np.ascontiguousarray(node1)             # <<<<<<<<<<<<<<
@@ -5457,7 +5457,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
   __Pyx_DECREF_SET(__pyx_v_node1, ((PyArrayObject *)__pyx_t_1));
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":131
+  /* "torch_connectomics/utils/seg/seg_core.pyx":131
  *     marker = np.ascontiguousarray(marker)
  *     node1 = np.ascontiguousarray(node1)
  *     node2 = np.ascontiguousarray(node2)             # <<<<<<<<<<<<<<
@@ -5507,7 +5507,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
   __Pyx_DECREF_SET(__pyx_v_node2, ((PyArrayObject *)__pyx_t_1));
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":132
+  /* "torch_connectomics/utils/seg/seg_core.pyx":132
  *     node1 = np.ascontiguousarray(node1)
  *     node2 = np.ascontiguousarray(node2)
  *     edgeWeight = np.ascontiguousarray(edgeWeight)             # <<<<<<<<<<<<<<
@@ -5557,7 +5557,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
   __Pyx_DECREF_SET(__pyx_v_edgeWeight, ((PyArrayObject *)__pyx_t_1));
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":133
+  /* "torch_connectomics/utils/seg/seg_core.pyx":133
  *     node2 = np.ascontiguousarray(node2)
  *     edgeWeight = np.ascontiguousarray(edgeWeight)
  *     cdef np.ndarray[uint64_t,ndim=1] seg = np.zeros(nVert,dtype=np.uint64)             # <<<<<<<<<<<<<<
@@ -5604,7 +5604,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
   __pyx_v_seg = ((PyArrayObject *)__pyx_t_13);
   __pyx_t_13 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":134
+  /* "torch_connectomics/utils/seg/seg_core.pyx":134
  *     edgeWeight = np.ascontiguousarray(edgeWeight)
  *     cdef np.ndarray[uint64_t,ndim=1] seg = np.zeros(nVert,dtype=np.uint64)
  *     marker_watershed_cpp(nVert, &marker[0],             # <<<<<<<<<<<<<<
@@ -5622,7 +5622,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
     __PYX_ERR(0, 134, __pyx_L1_error)
   }
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":135
+  /* "torch_connectomics/utils/seg/seg_core.pyx":135
  *     cdef np.ndarray[uint64_t,ndim=1] seg = np.zeros(nVert,dtype=np.uint64)
  *     marker_watershed_cpp(nVert, &marker[0],
  *                          nEdge, &node1[0], &node2[0], &edgeWeight[0],             # <<<<<<<<<<<<<<
@@ -5660,7 +5660,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
     __PYX_ERR(0, 135, __pyx_L1_error)
   }
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":136
+  /* "torch_connectomics/utils/seg/seg_core.pyx":136
  *     marker_watershed_cpp(nVert, &marker[0],
  *                          nEdge, &node1[0], &node2[0], &edgeWeight[0],
  *                          &seg[0]);             # <<<<<<<<<<<<<<
@@ -5678,7 +5678,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
     __PYX_ERR(0, 136, __pyx_L1_error)
   }
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":134
+  /* "torch_connectomics/utils/seg/seg_core.pyx":134
  *     edgeWeight = np.ascontiguousarray(edgeWeight)
  *     cdef np.ndarray[uint64_t,ndim=1] seg = np.zeros(nVert,dtype=np.uint64)
  *     marker_watershed_cpp(nVert, &marker[0],             # <<<<<<<<<<<<<<
@@ -5687,7 +5687,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
  */
   marker_watershed_cpp(__pyx_v_nVert, (&(*__Pyx_BufPtrStrided1d(uint64_t *, __pyx_pybuffernd_marker.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_marker.diminfo[0].strides))), __pyx_v_nEdge, (&(*__Pyx_BufPtrStrided1d(uint64_t *, __pyx_pybuffernd_node1.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_node1.diminfo[0].strides))), (&(*__Pyx_BufPtrStrided1d(uint64_t *, __pyx_pybuffernd_node2.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_node2.diminfo[0].strides))), (&(*__Pyx_BufPtrStrided1d(float *, __pyx_pybuffernd_edgeWeight.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_edgeWeight.diminfo[0].strides))), (&(*__Pyx_BufPtrStrided1d(uint64_t *, __pyx_pybuffernd_seg.rcbuffer->pybuffer.buf, __pyx_t_19, __pyx_pybuffernd_seg.diminfo[0].strides))));
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":137
+  /* "torch_connectomics/utils/seg/seg_core.pyx":137
  *                          nEdge, &node1[0], &node2[0], &edgeWeight[0],
  *                          &seg[0]);
  *     (seg,segSizes) = prune_and_renum(seg,sizeThreshold)             # <<<<<<<<<<<<<<
@@ -5816,7 +5816,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
   __pyx_v_segSizes = __pyx_t_12;
   __pyx_t_12 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":138
+  /* "torch_connectomics/utils/seg/seg_core.pyx":138
  *                          &seg[0]);
  *     (seg,segSizes) = prune_and_renum(seg,sizeThreshold)
  *     return (seg, segSizes)             # <<<<<<<<<<<<<<
@@ -5836,7 +5836,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
   __pyx_t_13 = 0;
   goto __pyx_L0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":122
+  /* "torch_connectomics/utils/seg/seg_core.pyx":122
  *     return (seg, segSizes)
  * 
  * def marker_watershed(np.ndarray[uint64_t,ndim=1] marker,             # <<<<<<<<<<<<<<
@@ -5861,7 +5861,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_node2.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_seg.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.marker_watershed", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.marker_watershed", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -5882,7 +5882,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
   return __pyx_r;
 }
 
-/* "vcg_connectomics/utils/seg/seg_core.pyx":140
+/* "torch_connectomics/utils/seg/seg_core.pyx":140
  *     return (seg, segSizes)
  * 
  * def connected_components_affgraph(aff,nhood=mknhood3d()):             # <<<<<<<<<<<<<<
@@ -5891,9 +5891,9 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_10marker_wate
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph = {"connected_components_affgraph", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph = {"connected_components_affgraph", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_aff = 0;
   PyObject *__pyx_v_nhood = 0;
   PyObject *__pyx_r = 0;
@@ -5945,18 +5945,18 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_13connected_c
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("connected_components_affgraph", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 140, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.connected_components_affgraph", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.connected_components_affgraph", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_components_affgraph(__pyx_self, __pyx_v_aff, __pyx_v_nhood);
+  __pyx_r = __pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_12connected_components_affgraph(__pyx_self, __pyx_v_aff, __pyx_v_nhood);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_components_affgraph(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_aff, PyObject *__pyx_v_nhood) {
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_12connected_components_affgraph(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_aff, PyObject *__pyx_v_nhood) {
   PyObject *__pyx_v_node1 = NULL;
   PyObject *__pyx_v_node2 = NULL;
   PyObject *__pyx_v_edge = NULL;
@@ -5974,7 +5974,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_c
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("connected_components_affgraph", 0);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":141
+  /* "torch_connectomics/utils/seg/seg_core.pyx":141
  * 
  * def connected_components_affgraph(aff,nhood=mknhood3d()):
  *     (node1,node2,edge) = affgraph_to_edgelist(aff,nhood)             # <<<<<<<<<<<<<<
@@ -6088,7 +6088,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_c
   __pyx_v_edge = __pyx_t_3;
   __pyx_t_3 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":142
+  /* "torch_connectomics/utils/seg/seg_core.pyx":142
  * def connected_components_affgraph(aff,nhood=mknhood3d()):
  *     (node1,node2,edge) = affgraph_to_edgelist(aff,nhood)
  *     (seg,segSizes) = connected_components(int(np.prod(aff.shape[1:])),node1,node2,edge)             # <<<<<<<<<<<<<<
@@ -6230,7 +6230,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_c
   __pyx_v_segSizes = __pyx_t_8;
   __pyx_t_8 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":143
+  /* "torch_connectomics/utils/seg/seg_core.pyx":143
  *     (node1,node2,edge) = affgraph_to_edgelist(aff,nhood)
  *     (seg,segSizes) = connected_components(int(np.prod(aff.shape[1:])),node1,node2,edge)
  *     seg = seg.reshape(aff.shape[1:])             # <<<<<<<<<<<<<<
@@ -6263,7 +6263,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_c
   __Pyx_DECREF_SET(__pyx_v_seg, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":144
+  /* "torch_connectomics/utils/seg/seg_core.pyx":144
  *     (seg,segSizes) = connected_components(int(np.prod(aff.shape[1:])),node1,node2,edge)
  *     seg = seg.reshape(aff.shape[1:])
  *     return (seg,segSizes)             # <<<<<<<<<<<<<<
@@ -6283,7 +6283,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_c
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":140
+  /* "torch_connectomics/utils/seg/seg_core.pyx":140
  *     return (seg, segSizes)
  * 
  * def connected_components_affgraph(aff,nhood=mknhood3d()):             # <<<<<<<<<<<<<<
@@ -6299,7 +6299,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_c
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.connected_components_affgraph", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.connected_components_affgraph", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_node1);
@@ -6312,7 +6312,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_c
   return __pyx_r;
 }
 
-/* "vcg_connectomics/utils/seg/seg_core.pyx":147
+/* "torch_connectomics/utils/seg/seg_core.pyx":147
  * 
  * 
  * def connected_components(int nVert,             # <<<<<<<<<<<<<<
@@ -6321,9 +6321,9 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_12connected_c
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_15connected_components(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_15connected_components = {"connected_components", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_15connected_components, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_15connected_components(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_15connected_components(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_15connected_components = {"connected_components", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_15connected_components, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_18torch_connectomics_5utils_3seg_8seg_core_15connected_components(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   int __pyx_v_nVert;
   PyArrayObject *__pyx_v_node1 = 0;
   PyArrayObject *__pyx_v_node2 = 0;
@@ -6411,14 +6411,14 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_15connected_c
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("connected_components", 0, 4, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 147, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.connected_components", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.connected_components", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_node1), __pyx_ptype_5numpy_ndarray, 1, "node1", 0))) __PYX_ERR(0, 148, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_node2), __pyx_ptype_5numpy_ndarray, 1, "node2", 0))) __PYX_ERR(0, 149, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_edgeWeight), __pyx_ptype_5numpy_ndarray, 1, "edgeWeight", 0))) __PYX_ERR(0, 150, __pyx_L1_error)
-  __pyx_r = __pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_components(__pyx_self, __pyx_v_nVert, __pyx_v_node1, __pyx_v_node2, __pyx_v_edgeWeight, __pyx_v_sizeThreshold);
+  __pyx_r = __pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_14connected_components(__pyx_self, __pyx_v_nVert, __pyx_v_node1, __pyx_v_node2, __pyx_v_edgeWeight, __pyx_v_sizeThreshold);
 
   /* function exit code */
   goto __pyx_L0;
@@ -6429,7 +6429,7 @@ static PyObject *__pyx_pw_16vcg_connectomics_5utils_3seg_8seg_core_15connected_c
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_components(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_nVert, PyArrayObject *__pyx_v_node1, PyArrayObject *__pyx_v_node2, PyArrayObject *__pyx_v_edgeWeight, int __pyx_v_sizeThreshold) {
+static PyObject *__pyx_pf_18torch_connectomics_5utils_3seg_8seg_core_14connected_components(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_nVert, PyArrayObject *__pyx_v_node1, PyArrayObject *__pyx_v_node2, PyArrayObject *__pyx_v_edgeWeight, int __pyx_v_sizeThreshold) {
   int __pyx_v_nEdge;
   PyArrayObject *__pyx_v_seg = 0;
   PyObject *__pyx_v_segSizes = NULL;
@@ -6497,7 +6497,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
   }
   __pyx_pybuffernd_edgeWeight.diminfo[0].strides = __pyx_pybuffernd_edgeWeight.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_edgeWeight.diminfo[0].shape = __pyx_pybuffernd_edgeWeight.rcbuffer->pybuffer.shape[0];
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":152
+  /* "torch_connectomics/utils/seg/seg_core.pyx":152
  *                          np.ndarray[int,ndim=1] edgeWeight,
  *                          int sizeThreshold=1):
  *     cdef int nEdge = node1.shape[0]             # <<<<<<<<<<<<<<
@@ -6506,7 +6506,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
  */
   __pyx_v_nEdge = (__pyx_v_node1->dimensions[0]);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":153
+  /* "torch_connectomics/utils/seg/seg_core.pyx":153
  *                          int sizeThreshold=1):
  *     cdef int nEdge = node1.shape[0]
  *     node1 = np.ascontiguousarray(node1)             # <<<<<<<<<<<<<<
@@ -6556,7 +6556,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
   __Pyx_DECREF_SET(__pyx_v_node1, ((PyArrayObject *)__pyx_t_1));
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":154
+  /* "torch_connectomics/utils/seg/seg_core.pyx":154
  *     cdef int nEdge = node1.shape[0]
  *     node1 = np.ascontiguousarray(node1)
  *     node2 = np.ascontiguousarray(node2)             # <<<<<<<<<<<<<<
@@ -6606,7 +6606,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
   __Pyx_DECREF_SET(__pyx_v_node2, ((PyArrayObject *)__pyx_t_1));
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":155
+  /* "torch_connectomics/utils/seg/seg_core.pyx":155
  *     node1 = np.ascontiguousarray(node1)
  *     node2 = np.ascontiguousarray(node2)
  *     edgeWeight = np.ascontiguousarray(edgeWeight)             # <<<<<<<<<<<<<<
@@ -6656,7 +6656,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
   __Pyx_DECREF_SET(__pyx_v_edgeWeight, ((PyArrayObject *)__pyx_t_1));
   __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":156
+  /* "torch_connectomics/utils/seg/seg_core.pyx":156
  *     node2 = np.ascontiguousarray(node2)
  *     edgeWeight = np.ascontiguousarray(edgeWeight)
  *     cdef np.ndarray[uint64_t,ndim=1] seg = np.zeros(nVert,dtype=np.uint64)             # <<<<<<<<<<<<<<
@@ -6703,7 +6703,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
   __pyx_v_seg = ((PyArrayObject *)__pyx_t_12);
   __pyx_t_12 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":158
+  /* "torch_connectomics/utils/seg/seg_core.pyx":158
  *     cdef np.ndarray[uint64_t,ndim=1] seg = np.zeros(nVert,dtype=np.uint64)
  *     connected_components_cpp(nVert,
  *                              nEdge, &node1[0], &node2[0], &edgeWeight[0],             # <<<<<<<<<<<<<<
@@ -6741,7 +6741,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
     __PYX_ERR(0, 158, __pyx_L1_error)
   }
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":159
+  /* "torch_connectomics/utils/seg/seg_core.pyx":159
  *     connected_components_cpp(nVert,
  *                              nEdge, &node1[0], &node2[0], &edgeWeight[0],
  *                              &seg[0]);             # <<<<<<<<<<<<<<
@@ -6759,7 +6759,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
     __PYX_ERR(0, 159, __pyx_L1_error)
   }
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":157
+  /* "torch_connectomics/utils/seg/seg_core.pyx":157
  *     edgeWeight = np.ascontiguousarray(edgeWeight)
  *     cdef np.ndarray[uint64_t,ndim=1] seg = np.zeros(nVert,dtype=np.uint64)
  *     connected_components_cpp(nVert,             # <<<<<<<<<<<<<<
@@ -6768,7 +6768,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
  */
   connected_components_cpp(__pyx_v_nVert, __pyx_v_nEdge, (&(*__Pyx_BufPtrStrided1d(uint64_t *, __pyx_pybuffernd_node1.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_node1.diminfo[0].strides))), (&(*__Pyx_BufPtrStrided1d(uint64_t *, __pyx_pybuffernd_node2.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_node2.diminfo[0].strides))), (&(*__Pyx_BufPtrStrided1d(int *, __pyx_pybuffernd_edgeWeight.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_edgeWeight.diminfo[0].strides))), (&(*__Pyx_BufPtrStrided1d(uint64_t *, __pyx_pybuffernd_seg.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_seg.diminfo[0].strides))));
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":160
+  /* "torch_connectomics/utils/seg/seg_core.pyx":160
  *                              nEdge, &node1[0], &node2[0], &edgeWeight[0],
  *                              &seg[0]);
  *     (seg,segSizes) = prune_and_renum(seg,sizeThreshold)             # <<<<<<<<<<<<<<
@@ -6896,7 +6896,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
   __pyx_v_segSizes = __pyx_t_11;
   __pyx_t_11 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":161
+  /* "torch_connectomics/utils/seg/seg_core.pyx":161
  *                              &seg[0]);
  *     (seg,segSizes) = prune_and_renum(seg,sizeThreshold)
  *     return (seg, segSizes)             # <<<<<<<<<<<<<<
@@ -6914,7 +6914,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
   __pyx_t_12 = 0;
   goto __pyx_L0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":147
+  /* "torch_connectomics/utils/seg/seg_core.pyx":147
  * 
  * 
  * def connected_components(int nVert,             # <<<<<<<<<<<<<<
@@ -6938,7 +6938,7 @@ static PyObject *__pyx_pf_16vcg_connectomics_5utils_3seg_8seg_core_14connected_c
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_node2.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_seg.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("vcg_connectomics.utils.seg.seg_core.connected_components", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("torch_connectomics.utils.seg.seg_core.connected_components", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -22617,7 +22617,7 @@ static PyBufferProcs __pyx_tp_as_buffer_array = {
 
 static PyTypeObject __pyx_type___pyx_array = {
   PyVarObject_HEAD_INIT(0, 0)
-  "vcg_connectomics.utils.seg.seg_core.array", /*tp_name*/
+  "torch_connectomics.utils.seg.seg_core.array", /*tp_name*/
   sizeof(struct __pyx_array_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_array, /*tp_dealloc*/
@@ -22725,7 +22725,7 @@ static PyMethodDef __pyx_methods_Enum[] = {
 
 static PyTypeObject __pyx_type___pyx_MemviewEnum = {
   PyVarObject_HEAD_INIT(0, 0)
-  "vcg_connectomics.utils.seg.seg_core.Enum", /*tp_name*/
+  "torch_connectomics.utils.seg.seg_core.Enum", /*tp_name*/
   sizeof(struct __pyx_MemviewEnum_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_Enum, /*tp_dealloc*/
@@ -22975,7 +22975,7 @@ static PyBufferProcs __pyx_tp_as_buffer_memoryview = {
 
 static PyTypeObject __pyx_type___pyx_memoryview = {
   PyVarObject_HEAD_INIT(0, 0)
-  "vcg_connectomics.utils.seg.seg_core.memoryview", /*tp_name*/
+  "torch_connectomics.utils.seg.seg_core.memoryview", /*tp_name*/
   sizeof(struct __pyx_memoryview_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_memoryview, /*tp_dealloc*/
@@ -23102,7 +23102,7 @@ static struct PyGetSetDef __pyx_getsets__memoryviewslice[] = {
 
 static PyTypeObject __pyx_type___pyx_memoryviewslice = {
   PyVarObject_HEAD_INIT(0, 0)
-  "vcg_connectomics.utils.seg.seg_core._memoryviewslice", /*tp_name*/
+  "torch_connectomics.utils.seg.seg_core._memoryviewslice", /*tp_name*/
   sizeof(struct __pyx_memoryviewslice_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc__memoryviewslice, /*tp_dealloc*/
@@ -23374,6 +23374,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_tmp_components, __pyx_k_tmp_components, sizeof(__pyx_k_tmp_components), 0, 0, 1, 1},
   {&__pyx_n_s_tmp_mapping, __pyx_k_tmp_mapping, sizeof(__pyx_k_tmp_mapping), 0, 0, 1, 1},
   {&__pyx_n_s_tmp_segmentation, __pyx_k_tmp_segmentation, sizeof(__pyx_k_tmp_segmentation), 0, 0, 1, 1},
+  {&__pyx_n_s_torch_connectomics_utils_seg_aff, __pyx_k_torch_connectomics_utils_seg_aff, sizeof(__pyx_k_torch_connectomics_utils_seg_aff), 0, 0, 1, 1},
+  {&__pyx_n_s_torch_connectomics_utils_seg_seg, __pyx_k_torch_connectomics_utils_seg_seg, sizeof(__pyx_k_torch_connectomics_utils_seg_seg), 0, 0, 1, 1},
+  {&__pyx_kp_s_torch_connectomics_utils_seg_seg_2, __pyx_k_torch_connectomics_utils_seg_seg_2, sizeof(__pyx_k_torch_connectomics_utils_seg_seg_2), 0, 0, 1, 0},
+  {&__pyx_n_s_torch_connectomics_utils_seg_seg_3, __pyx_k_torch_connectomics_utils_seg_seg_3, sizeof(__pyx_k_torch_connectomics_utils_seg_seg_3), 0, 0, 1, 1},
   {&__pyx_n_s_uint64, __pyx_k_uint64, sizeof(__pyx_k_uint64), 0, 0, 1, 1},
   {&__pyx_kp_s_unable_to_allocate_array_data, __pyx_k_unable_to_allocate_array_data, sizeof(__pyx_k_unable_to_allocate_array_data), 0, 0, 1, 0},
   {&__pyx_kp_s_unable_to_allocate_shape_and_str, __pyx_k_unable_to_allocate_shape_and_str, sizeof(__pyx_k_unable_to_allocate_shape_and_str), 0, 0, 1, 0},
@@ -23382,10 +23386,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_unpack, __pyx_k_unpack, sizeof(__pyx_k_unpack), 0, 0, 1, 1},
   {&__pyx_n_s_update, __pyx_k_update, sizeof(__pyx_k_update), 0, 0, 1, 1},
   {&__pyx_n_s_updated_segmentation, __pyx_k_updated_segmentation, sizeof(__pyx_k_updated_segmentation), 0, 0, 1, 1},
-  {&__pyx_n_s_vcg_connectomics_utils_seg_aff_u, __pyx_k_vcg_connectomics_utils_seg_aff_u, sizeof(__pyx_k_vcg_connectomics_utils_seg_aff_u), 0, 0, 1, 1},
-  {&__pyx_kp_s_vcg_connectomics_utils_seg_seg_c, __pyx_k_vcg_connectomics_utils_seg_seg_c, sizeof(__pyx_k_vcg_connectomics_utils_seg_seg_c), 0, 0, 1, 0},
-  {&__pyx_n_s_vcg_connectomics_utils_seg_seg_c_2, __pyx_k_vcg_connectomics_utils_seg_seg_c_2, sizeof(__pyx_k_vcg_connectomics_utils_seg_seg_c_2), 0, 0, 1, 1},
-  {&__pyx_n_s_vcg_connectomics_utils_seg_seg_u, __pyx_k_vcg_connectomics_utils_seg_seg_u, sizeof(__pyx_k_vcg_connectomics_utils_seg_seg_u), 0, 0, 1, 1},
   {&__pyx_n_s_xres, __pyx_k_xres, sizeof(__pyx_k_xres), 0, 0, 1, 1},
   {&__pyx_n_s_yres, __pyx_k_yres, sizeof(__pyx_k_yres), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
@@ -23412,7 +23412,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":109
+  /* "torch_connectomics/utils/seg/seg_core.pyx":109
  *     # renumber the components in descending order by size
  *     segId,segSizes = np.unique(seg, return_counts=True)
  *     descOrder = np.argsort(segSizes)[::-1]             # <<<<<<<<<<<<<<
@@ -23423,7 +23423,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_slice_);
   __Pyx_GIVEREF(__pyx_slice_);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":142
+  /* "torch_connectomics/utils/seg/seg_core.pyx":142
  * def connected_components_affgraph(aff,nhood=mknhood3d()):
  *     (node1,node2,edge) = affgraph_to_edgelist(aff,nhood)
  *     (seg,segSizes) = connected_components(int(np.prod(aff.shape[1:])),node1,node2,edge)             # <<<<<<<<<<<<<<
@@ -23703,7 +23703,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__28);
   __Pyx_GIVEREF(__pyx_tuple__28);
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":31
+  /* "torch_connectomics/utils/seg/seg_core.pyx":31
  * 
  * ## 1. seg2gold
  * def Mapping(segmentation, gold, low_threshold=0.10, high_threshold=0.80):             # <<<<<<<<<<<<<<
@@ -23713,9 +23713,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__34 = PyTuple_Pack(9, __pyx_n_s_segmentation, __pyx_n_s_gold, __pyx_n_s_low_threshold, __pyx_n_s_high_threshold, __pyx_n_s_cpp_segmentation, __pyx_n_s_cpp_gold, __pyx_n_s_max_segmentation, __pyx_n_s_mapping, __pyx_n_s_tmp_mapping); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__34);
   __Pyx_GIVEREF(__pyx_tuple__34);
-  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(4, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vcg_connectomics_utils_seg_seg_c, __pyx_n_s_Mapping, 31, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 31, __pyx_L1_error)
+  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(4, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_torch_connectomics_utils_seg_seg_2, __pyx_n_s_Mapping, 31, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 31, __pyx_L1_error)
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":47
+  /* "torch_connectomics/utils/seg/seg_core.pyx":47
  * ## 2. seg2seg
  * # map the labels from this segmentation
  * def MapLabels(segmentation, mapping):             # <<<<<<<<<<<<<<
@@ -23725,9 +23725,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__36 = PyTuple_Pack(10, __pyx_n_s_segmentation, __pyx_n_s_mapping, __pyx_n_s_zres, __pyx_n_s_yres, __pyx_n_s_xres, __pyx_n_s_nentries, __pyx_n_s_cpp_segmentation, __pyx_n_s_cpp_mapping, __pyx_n_s_mapped_segmentation, __pyx_n_s_tmp_segmentation); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__36);
   __Pyx_GIVEREF(__pyx_tuple__36);
-  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(2, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vcg_connectomics_utils_seg_seg_c, __pyx_n_s_MapLabels, 47, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(2, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_torch_connectomics_utils_seg_seg_2, __pyx_n_s_MapLabels, 47, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 47, __pyx_L1_error)
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":66
+  /* "torch_connectomics/utils/seg/seg_core.pyx":66
  * 
  * # remove the components less than min size
  * def RemoveSmallConnectedComponents(segmentation, threshold=64):             # <<<<<<<<<<<<<<
@@ -23737,9 +23737,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__38 = PyTuple_Pack(10, __pyx_n_s_segmentation, __pyx_n_s_threshold, __pyx_n_s_nentries, __pyx_n_s_zres, __pyx_n_s_yres, __pyx_n_s_xres, __pyx_n_s_cpp_segmentation, __pyx_n_s_updated_segmentation, __pyx_n_s_tmp_segmentation, __pyx_n_s_thresholded_segmentation); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__38);
   __Pyx_GIVEREF(__pyx_tuple__38);
-  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(2, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vcg_connectomics_utils_seg_seg_c, __pyx_n_s_RemoveSmallConnectedComponents, 66, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(2, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_torch_connectomics_utils_seg_seg_2, __pyx_n_s_RemoveSmallConnectedComponents, 66, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 66, __pyx_L1_error)
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":87
+  /* "torch_connectomics/utils/seg/seg_core.pyx":87
  * 
  * 
  * def ForceConnectivity(segmentation):             # <<<<<<<<<<<<<<
@@ -23749,9 +23749,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__40 = PyTuple_Pack(8, __pyx_n_s_segmentation, __pyx_n_s_cpp_segmentation, __pyx_n_s_zres, __pyx_n_s_yres, __pyx_n_s_xres, __pyx_n_s_cpp_components, __pyx_n_s_tmp_components, __pyx_n_s_components); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__40);
   __Pyx_GIVEREF(__pyx_tuple__40);
-  __pyx_codeobj__41 = (PyObject*)__Pyx_PyCode_New(1, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__40, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vcg_connectomics_utils_seg_seg_c, __pyx_n_s_ForceConnectivity, 87, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__41)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_codeobj__41 = (PyObject*)__Pyx_PyCode_New(1, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__40, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_torch_connectomics_utils_seg_seg_2, __pyx_n_s_ForceConnectivity, 87, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__41)) __PYX_ERR(0, 87, __pyx_L1_error)
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":105
+  /* "torch_connectomics/utils/seg/seg_core.pyx":105
  *     return components
  * 
  * def prune_and_renum(np.ndarray[uint64_t,ndim=1] seg,             # <<<<<<<<<<<<<<
@@ -23761,9 +23761,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__42 = PyTuple_Pack(6, __pyx_n_s_seg, __pyx_n_s_sizeThreshold, __pyx_n_s_segId, __pyx_n_s_segSizes, __pyx_n_s_descOrder, __pyx_n_s_renum); if (unlikely(!__pyx_tuple__42)) __PYX_ERR(0, 105, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__42);
   __Pyx_GIVEREF(__pyx_tuple__42);
-  __pyx_codeobj__43 = (PyObject*)__Pyx_PyCode_New(2, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__42, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vcg_connectomics_utils_seg_seg_c, __pyx_n_s_prune_and_renum, 105, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__43)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_codeobj__43 = (PyObject*)__Pyx_PyCode_New(2, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__42, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_torch_connectomics_utils_seg_seg_2, __pyx_n_s_prune_and_renum, 105, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__43)) __PYX_ERR(0, 105, __pyx_L1_error)
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":122
+  /* "torch_connectomics/utils/seg/seg_core.pyx":122
  *     return (seg, segSizes)
  * 
  * def marker_watershed(np.ndarray[uint64_t,ndim=1] marker,             # <<<<<<<<<<<<<<
@@ -23773,9 +23773,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__44 = PyTuple_Pack(9, __pyx_n_s_marker, __pyx_n_s_node1, __pyx_n_s_node2, __pyx_n_s_edgeWeight, __pyx_n_s_sizeThreshold, __pyx_n_s_nVert, __pyx_n_s_nEdge, __pyx_n_s_seg, __pyx_n_s_segSizes); if (unlikely(!__pyx_tuple__44)) __PYX_ERR(0, 122, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__44);
   __Pyx_GIVEREF(__pyx_tuple__44);
-  __pyx_codeobj__45 = (PyObject*)__Pyx_PyCode_New(5, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__44, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vcg_connectomics_utils_seg_seg_c, __pyx_n_s_marker_watershed, 122, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__45)) __PYX_ERR(0, 122, __pyx_L1_error)
+  __pyx_codeobj__45 = (PyObject*)__Pyx_PyCode_New(5, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__44, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_torch_connectomics_utils_seg_seg_2, __pyx_n_s_marker_watershed, 122, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__45)) __PYX_ERR(0, 122, __pyx_L1_error)
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":140
+  /* "torch_connectomics/utils/seg/seg_core.pyx":140
  *     return (seg, segSizes)
  * 
  * def connected_components_affgraph(aff,nhood=mknhood3d()):             # <<<<<<<<<<<<<<
@@ -23785,9 +23785,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__46 = PyTuple_Pack(7, __pyx_n_s_aff, __pyx_n_s_nhood, __pyx_n_s_node1, __pyx_n_s_node2, __pyx_n_s_edge, __pyx_n_s_seg, __pyx_n_s_segSizes); if (unlikely(!__pyx_tuple__46)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__46);
   __Pyx_GIVEREF(__pyx_tuple__46);
-  __pyx_codeobj__47 = (PyObject*)__Pyx_PyCode_New(2, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__46, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vcg_connectomics_utils_seg_seg_c, __pyx_n_s_connected_components_affgraph, 140, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__47)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_codeobj__47 = (PyObject*)__Pyx_PyCode_New(2, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__46, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_torch_connectomics_utils_seg_seg_2, __pyx_n_s_connected_components_affgraph, 140, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__47)) __PYX_ERR(0, 140, __pyx_L1_error)
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":147
+  /* "torch_connectomics/utils/seg/seg_core.pyx":147
  * 
  * 
  * def connected_components(int nVert,             # <<<<<<<<<<<<<<
@@ -23797,7 +23797,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__48 = PyTuple_Pack(8, __pyx_n_s_nVert, __pyx_n_s_node1, __pyx_n_s_node2, __pyx_n_s_edgeWeight, __pyx_n_s_sizeThreshold, __pyx_n_s_nEdge, __pyx_n_s_seg, __pyx_n_s_segSizes); if (unlikely(!__pyx_tuple__48)) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__48);
   __Pyx_GIVEREF(__pyx_tuple__48);
-  __pyx_codeobj__49 = (PyObject*)__Pyx_PyCode_New(5, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__48, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vcg_connectomics_utils_seg_seg_c, __pyx_n_s_connected_components, 147, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__49)) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_codeobj__49 = (PyObject*)__Pyx_PyCode_New(5, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__48, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_torch_connectomics_utils_seg_seg_2, __pyx_n_s_connected_components, 147, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__49)) __PYX_ERR(0, 147, __pyx_L1_error)
 
   /* "View.MemoryView":286
  *         return self.name
@@ -24200,14 +24200,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_vcg_connectomics__utils__seg__seg_core) {
+  if (__pyx_module_is_main_torch_connectomics__utils__seg__seg_core) {
     if (PyObject_SetAttr(__pyx_m, __pyx_n_s_name_2, __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "vcg_connectomics.utils.seg.seg_core")) {
-      if (unlikely(PyDict_SetItemString(modules, "vcg_connectomics.utils.seg.seg_core", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "torch_connectomics.utils.seg.seg_core")) {
+      if (unlikely(PyDict_SetItemString(modules, "torch_connectomics.utils.seg.seg_core", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -24228,7 +24228,7 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":4
+  /* "torch_connectomics/utils/seg/seg_core.pyx":4
  * cimport numpy as np
  * 
  * import ctypes             # <<<<<<<<<<<<<<
@@ -24240,7 +24240,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_ctypes, __pyx_t_1) < 0) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":6
+  /* "torch_connectomics/utils/seg/seg_core.pyx":6
  * import ctypes
  * from libc.stdint cimport uint64_t,int32_t
  * import numpy as np             # <<<<<<<<<<<<<<
@@ -24252,23 +24252,23 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":7
+  /* "torch_connectomics/utils/seg/seg_core.pyx":7
  * from libc.stdint cimport uint64_t,int32_t
  * import numpy as np
  * import scipy.ndimage             # <<<<<<<<<<<<<<
  * 
- * from vcg_connectomics.utils.seg.aff_util import affgraph_to_edgelist
+ * from torch_connectomics.utils.seg.aff_util import affgraph_to_edgelist
  */
   __pyx_t_1 = __Pyx_Import(__pyx_n_s_scipy_ndimage, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_scipy, __pyx_t_1) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":9
+  /* "torch_connectomics/utils/seg/seg_core.pyx":9
  * import scipy.ndimage
  * 
- * from vcg_connectomics.utils.seg.aff_util import affgraph_to_edgelist             # <<<<<<<<<<<<<<
- * from vcg_connectomics.utils.seg.seg_util import mknhood3d
+ * from torch_connectomics.utils.seg.aff_util import affgraph_to_edgelist             # <<<<<<<<<<<<<<
+ * from torch_connectomics.utils.seg.seg_util import mknhood3d
  * 
  */
   __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
@@ -24276,7 +24276,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_affgraph_to_edgelist);
   __Pyx_GIVEREF(__pyx_n_s_affgraph_to_edgelist);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_affgraph_to_edgelist);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_vcg_connectomics_utils_seg_aff_u, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_torch_connectomics_utils_seg_aff, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_affgraph_to_edgelist); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
@@ -24285,10 +24285,10 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":10
+  /* "torch_connectomics/utils/seg/seg_core.pyx":10
  * 
- * from vcg_connectomics.utils.seg.aff_util import affgraph_to_edgelist
- * from vcg_connectomics.utils.seg.seg_util import mknhood3d             # <<<<<<<<<<<<<<
+ * from torch_connectomics.utils.seg.aff_util import affgraph_to_edgelist
+ * from torch_connectomics.utils.seg.seg_util import mknhood3d             # <<<<<<<<<<<<<<
  * 
  * cdef extern from 'cpp/seg_core/cpp-seg2seg.h':
  */
@@ -24297,7 +24297,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_mknhood3d);
   __Pyx_GIVEREF(__pyx_n_s_mknhood3d);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_mknhood3d);
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_vcg_connectomics_utils_seg_seg_u, __pyx_t_2, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_torch_connectomics_utils_seg_seg, __pyx_t_2, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_mknhood3d); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)
@@ -24306,79 +24306,79 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":31
+  /* "torch_connectomics/utils/seg/seg_core.pyx":31
  * 
  * ## 1. seg2gold
  * def Mapping(segmentation, gold, low_threshold=0.10, high_threshold=0.80):             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[long, ndim=3, mode='c'] cpp_segmentation
  *     cpp_segmentation = np.ascontiguousarray(segmentation, dtype=ctypes.c_int64)
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_1Mapping, NULL, __pyx_n_s_vcg_connectomics_utils_seg_seg_c_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 31, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_1Mapping, NULL, __pyx_n_s_torch_connectomics_utils_seg_seg_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_Mapping, __pyx_t_1) < 0) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":47
+  /* "torch_connectomics/utils/seg/seg_core.pyx":47
  * ## 2. seg2seg
  * # map the labels from this segmentation
  * def MapLabels(segmentation, mapping):             # <<<<<<<<<<<<<<
  *     # get the size of the data
  *     zres, yres, xres = segmentation.shape
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_3MapLabels, NULL, __pyx_n_s_vcg_connectomics_utils_seg_seg_c_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_3MapLabels, NULL, __pyx_n_s_torch_connectomics_utils_seg_seg_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_MapLabels, __pyx_t_1) < 0) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":66
+  /* "torch_connectomics/utils/seg/seg_core.pyx":66
  * 
  * # remove the components less than min size
  * def RemoveSmallConnectedComponents(segmentation, threshold=64):             # <<<<<<<<<<<<<<
  *     if threshold == 0: return segmentation
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents, NULL, __pyx_n_s_vcg_connectomics_utils_seg_seg_c_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_5RemoveSmallConnectedComponents, NULL, __pyx_n_s_torch_connectomics_utils_seg_seg_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_RemoveSmallConnectedComponents, __pyx_t_1) < 0) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":87
+  /* "torch_connectomics/utils/seg/seg_core.pyx":87
  * 
  * 
  * def ForceConnectivity(segmentation):             # <<<<<<<<<<<<<<
  *     # transform into c array
  *     cdef np.ndarray[long, ndim=3, mode='c'] cpp_segmentation
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_7ForceConnectivity, NULL, __pyx_n_s_vcg_connectomics_utils_seg_seg_c_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_7ForceConnectivity, NULL, __pyx_n_s_torch_connectomics_utils_seg_seg_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_ForceConnectivity, __pyx_t_1) < 0) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":105
+  /* "torch_connectomics/utils/seg/seg_core.pyx":105
  *     return components
  * 
  * def prune_and_renum(np.ndarray[uint64_t,ndim=1] seg,             # <<<<<<<<<<<<<<
  *                     int sizeThreshold=1):
  *     # renumber the components in descending order by size
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_9prune_and_renum, NULL, __pyx_n_s_vcg_connectomics_utils_seg_seg_c_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_9prune_and_renum, NULL, __pyx_n_s_torch_connectomics_utils_seg_seg_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 105, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_prune_and_renum, __pyx_t_1) < 0) __PYX_ERR(0, 105, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":122
+  /* "torch_connectomics/utils/seg/seg_core.pyx":122
  *     return (seg, segSizes)
  * 
  * def marker_watershed(np.ndarray[uint64_t,ndim=1] marker,             # <<<<<<<<<<<<<<
  *                      np.ndarray[uint64_t,ndim=1] node1,
  *                      np.ndarray[uint64_t,ndim=1] node2,
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_11marker_watershed, NULL, __pyx_n_s_vcg_connectomics_utils_seg_seg_c_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_11marker_watershed, NULL, __pyx_n_s_torch_connectomics_utils_seg_seg_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_marker_watershed, __pyx_t_1) < 0) __PYX_ERR(0, 122, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":140
+  /* "torch_connectomics/utils/seg/seg_core.pyx":140
  *     return (seg, segSizes)
  * 
  * def connected_components_affgraph(aff,nhood=mknhood3d()):             # <<<<<<<<<<<<<<
@@ -24393,24 +24393,24 @@ if (!__Pyx_RefNanny) {
   __pyx_k__2 = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph, NULL, __pyx_n_s_vcg_connectomics_utils_seg_seg_c_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_13connected_components_affgraph, NULL, __pyx_n_s_torch_connectomics_utils_seg_seg_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_connected_components_affgraph, __pyx_t_2) < 0) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":147
+  /* "torch_connectomics/utils/seg/seg_core.pyx":147
  * 
  * 
  * def connected_components(int nVert,             # <<<<<<<<<<<<<<
  *                          np.ndarray[uint64_t,ndim=1] node1,
  *                          np.ndarray[uint64_t,ndim=1] node2,
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_16vcg_connectomics_5utils_3seg_8seg_core_15connected_components, NULL, __pyx_n_s_vcg_connectomics_utils_seg_seg_c_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_18torch_connectomics_5utils_3seg_8seg_core_15connected_components, NULL, __pyx_n_s_torch_connectomics_utils_seg_seg_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_connected_components, __pyx_t_2) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "vcg_connectomics/utils/seg/seg_core.pyx":1
+  /* "torch_connectomics/utils/seg/seg_core.pyx":1
  * cimport cython             # <<<<<<<<<<<<<<
  * cimport numpy as np
  * 
@@ -24581,11 +24581,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_2);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init vcg_connectomics.utils.seg.seg_core", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init torch_connectomics.utils.seg.seg_core", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     Py_CLEAR(__pyx_m);
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init vcg_connectomics.utils.seg.seg_core");
+    PyErr_SetString(PyExc_ImportError, "init torch_connectomics.utils.seg.seg_core");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
