@@ -5,10 +5,10 @@ import time
 import imageio
 import argparse
 
-from connectomics.utils.seg.seg_dist import DilateData
-from connectomics.utils.seg.seg_util import relabel
-from connectomics.utils.seg.io_util import writeh5, readh5
-from connectomics.utils.seg.seg_eval import adapted_rand
+#from connectomics.utils.seg.seg_dist import DilateData
+from connectomics.data.utils.data_segmentation import relabel
+from connectomics.io.io_file import writeh5, readh5
+from connectomics.eval.eval_seg import adapted_rand
 
 from skimage.morphology import dilation,erosion
 
@@ -25,7 +25,7 @@ args = get_args()
 
 # add affinity location
 D_aff = args.pd
-aff = np.array(h5py.File(D_aff)['main'])
+aff = np.array(h5py.File(D_aff)['vol0'])
 print('dtype of affinity graph:', aff.dtype)
 assert aff.dtype in [np.uint8, np.float32]
 if aff.dtype == np.uint8: aff = (aff/255.0).astype(np.float32)
@@ -79,7 +79,7 @@ elif args.mode == 2:
     import waterz
     import zwatershed
     print('waterz:', waterz.__version__)
-    print('zwatershed:', zwatershed.__version__)
+    #print('zwatershed:', zwatershed.__version__)
     st = time.time()
     T_thres = [150]
     T_aff=[0.05,0.8,0.2]
