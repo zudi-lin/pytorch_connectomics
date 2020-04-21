@@ -33,7 +33,7 @@ class VolumeDataset(torch.utils.data.Dataset):
         self.input = volume
         self.label = label
         self.augmentor = augmentor  # data augmentation
-
+        self.sample_label_size = sample_label_size #Output Size
         self.target_opt = target_opt  # target opt
         self.weight_opt = weight_opt  # loss opt 
 
