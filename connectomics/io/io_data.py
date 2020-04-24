@@ -102,7 +102,7 @@ def get_dataset(args, mode='train', preload_data=[None,None]):
         label_json = args.input_path+args.label_name if mode=='train' else ''
         dataset = TileDataset(chunk_num=args.data_chunk_num, chunk_num_ind=args.data_chunk_num_ind, chunk_iter=args.data_chunk_iter, chunk_stride=args.data_chunk_stride,
                               volume_json=args.input_path+args.img_name, label_json=label_json,
-                              sample_volume_size=sample_volume_size, sample_label_size=sample_label_size,
+                              sample_input_size=sample_volume_size, sample_label_size=sample_label_size,
                               sample_stride=sample_stride, sample_invalid_thres = sample_invalid_thres,
                               augmentor=augmentor, target_opt = topt, weight_opt = wopt, mode = mode, 
                               label_erosion = label_erosion, pad_size=args.pad_size)
