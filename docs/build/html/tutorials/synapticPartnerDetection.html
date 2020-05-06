@@ -1,0 +1,315 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Synaptic Partner Detection &mdash; connectomics master documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="connectomics.model" href="../modules/model.html" />
+    <link rel="prev" title="Mitochondria Segmentaion" href="lucchi.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo_text.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                master (0.1)
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="snemi.html">Neuron Segmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cremi.html">Synaptic Cleft Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lucchi.html">Mitochondria Segmentaion</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Synaptic Partner Detection</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/model.html">connectomics.model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/model.html#building-blocks">Building Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/model.html#model-zoo">Model Zoo</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/augmentation.html">connectomics.data.augmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/datasets.html">connectomics.data.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/utils.html">connectomics.data.utils</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">connectomics</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Synaptic Partner Detection</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/synapticPartnerDetection.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="synaptic-partner-detection">
+<h1>Synaptic Partner Detection<a class="headerlink" href="#synaptic-partner-detection" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial provides step-by-step guidance for synaptic partner detection with the benchmark datasets.
+We consider the task as a semantic segmentation task and predict both the pre-synaptic and post-synaptic pixels with encoder-decoder ConvNets similar to
+the models used in affinity prediction in <a class="reference external" href="https://zudi-lin.github.io/pytorch_connectomics/build/html/tutorials/snemi.html">neuron segmentation</a>.
+The evaluation of the synapse detection results is based on the F1 score.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Our segmentation task consists of 2 targets and 3 channels. Targets are background and synapses whereas channels are pre-synapse, post-synapse and background.</p>
+</div>
+<p>All the scripts needed for this tutorial can be found at <code class="docutils literal notranslate"><span class="pre">pytorch_connectomics/scripts/</span></code>.  The pytorch dataset class of synapses is <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_connectomics.data.dataset.SynapseDataset</span></code>.</p>
+<ol class="arabic">
+<li><p>Dataset can be found on the Harvard RC server here:</p>
+<blockquote>
+<div><p>Image:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>/n/pfister_lab2/Lab/vcg_connectomics/cerebellum_P7/gt-syn/syn_0922_im_orig.h5
+</pre></div>
+</div>
+<p>Label:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>/n/pfister_lab2/Lab/vcg_connectomics/cerebellum_P7/gt-syn/syn_0922_seg.h5
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Run the training script. The training and inference script can take a list of volumes (separated by ‘&#64;’ in the code below) and conduct training/inference at the same time.</p>
+<blockquote>
+<div><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ source activate py3_torch
+$ python -u train.py -i /n/pfister_lab2/Lab/vcg_connectomics/cerebellum_P7/ \
+ -din gt-syn/syn_0922_im_orig.h5 -dln gt-syn/syn_0922_seg.h5 \
+ -o outputs/unetv0_syn -lr 1e-03 --iteration-total 50000 --iteration-save 5000 -mi 8,256,256 \
+ -ma unet_residual_3d -moc 3 -to 1.2,0 -lo 1,1 -wo 1,1 -lw 1,1 -g 4 -c 4 -b 8
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>data: <code class="docutils literal notranslate"><span class="pre">i/o/din/dln</span></code> (input folder/output folder/train volume/train label)</p></li>
+<li><p>optimization: <code class="docutils literal notranslate"><span class="pre">lr/iteration-total/iteration-save</span></code> (learning rate/total #iterations/#iterations to save)</p></li>
+<li><p>model: <code class="docutils literal notranslate"><span class="pre">mi/ma/moc</span></code> (input size/architecture/#output channel)</p></li>
+<li><p>loss: <code class="docutils literal notranslate"><span class="pre">to/lo/wo</span></code> (target option/loss option/weight option)</p></li>
+<li><p>system: <code class="docutils literal notranslate"><span class="pre">g/c/b</span></code> (#GPU/#CPU/batch size)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Visualize the training progress. More info <a class="reference external" href="https://vcg.github.io/newbie-wiki/build/html/computation/machine_rc.html">here</a>:</p>
+<blockquote>
+<div><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ tensorboard --logdir runs
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Run inference on image volumes:</p>
+<blockquote>
+<div><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python -u test.py \
+-i /n/pfister_lab2/Lab/vcg_connectomics/cerebellum_P7/ -din gt-syn/syn_0922_im_orig.h5 \
+-o outputs/unetv0_syn/result/ -mi 8,256,256 -ma unet_residual_3d -moc 1 -g 4 -c 4 -b 32 \
+-mpt outputs/unetv0_syn/log2020-04-17_18-55-44/volume_49999.pth -mpi 49999 -dp 8,64,64 -tam mean -tan 4
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>pre-train model: <code class="docutils literal notranslate"><span class="pre">mpt/mpi</span></code> (model path/iteration number)</p></li>
+<li><p>test configuration: <code class="docutils literal notranslate"><span class="pre">dp/tam/tan</span></code> (data padding/augmentation mode/augmentation number)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Evaluate your model using F1 score as metric:</p>
+<blockquote>
+<div><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ python /scripts/synapse_evaluate.py
+</pre></div>
+</div>
+<p>The evaluation script can be found <a class="reference external" href="https://github.com/zudi-lin/pytorch_connectomics/blob/master/tools/evaluation/evaluate_seg.py">here</a></p>
+</div></blockquote>
+</li>
+<li><p>Calculate connected components of your inferred results:</p>
+<blockquote>
+<div><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ python CC.py
+</pre></div>
+</div>
+<p>Note: CC.py can be found <a class="reference external" href="https://github.com/geekswaroop/EM-ConnectedComponent/blob/master/CC.py">here</a>.</p>
+</div></blockquote>
+</li>
+<li><p>Load your results onto Neuroglancer!</p>
+<blockquote>
+<div><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ python neuroG.py
+</pre></div>
+</div>
+<p>Note: neuroG.py can be found <a class="reference external" href="https://github.com/aarushgupta/NeuroG/blob/master/neuroG.py">here</a>.</p>
+</div></blockquote>
+</li>
+</ol>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../modules/model.html" class="btn btn-neutral float-right" title="connectomics.model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="lucchi.html" class="btn btn-neutral float-left" title="Mitochondria Segmentaion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Zudi Lin and Donglai Wei
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
