@@ -13,9 +13,9 @@ MODEL:
   TARGET_OPT: ['2']
   WEIGHT_OPT: [['1']]
 DATASET:
-  IMAGE_NAME: 'train.h5'
-  LABEL_NAME: 'label.h5'
-  INPUT_PATH: '/path/to/snemi/'
+  IMAGE_NAME: 'img/train-input.tif'
+  LABEL_NAME: 'label/train_labels.tif'
+  INPUT_PATH: '/n/pfister_lab2/Lab/vcg_connectomics/snemi/'
   OUTPUT_PATH: 'outputs/SNEMI/'
   PAD_SIZE: [4, 128, 128]
 AUGMENTOR:
