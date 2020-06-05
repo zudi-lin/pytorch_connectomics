@@ -36,8 +36,8 @@ overwrite the existing values in the config file. For example, ``main.py`` can b
     python -u scripts/main.py \
     --config-file configs/Lucchi-Mitochondria.yaml DATASET.IMAGE_NAME ‘img/train_im.h5’
   
-To see a list of available configs in Connectomics and what they mean, check ` Config References <https://github.com/zudi-
-lin/pytorch_connectomics/blob/master/connectomics/config/config.py> `
+To see a list of available configs in Connectomics and what they mean, check `Config References <https://github.com/zudi-
+lin/pytorch_connectomics/blob/master/connectomics/config/config.py>`_
 
 
 Best Practice with Configs
