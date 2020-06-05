@@ -7,7 +7,7 @@ The config system of Connectomics uses YAML, a human-readable data-serialization
 configuration system for research. In addition to the general tasks, that access and update a config, we provide the following extra 
 functionalities:
 
-#.The config have ``_C.key:value``  field, which will use a pre-defined config first. Values in the pre-defined config will 
+#. The config have ``_C.key:value``  field, which will use a pre-defined config first. Values in the pre-defined config will 
 be overwritten in sub-configs, if there are any according to requirements. We provided several base configs for standard model 
 architectures as ``task.yaml`` files.
 
@@ -38,8 +38,8 @@ lin/pytorch_connectomics/blob/master/connectomics/config/config.py>`
 
 Best Practice with Configs
 ==========================
-#.	Treat the configs you write as “code”: avoid copying them or duplicating them; use ``_BASE_`` to share common parts between 
+#. Treat the configs you write as “code”: avoid copying them or duplicating them; use ``_BASE_`` to share common parts between 
 configs.
-#.	Keep the configs you write simple: don’t include keys that do not affect the experimental setting.
+#. Keep the configs you write simple: don’t include keys that do not affect the experimental setting.
 
   
