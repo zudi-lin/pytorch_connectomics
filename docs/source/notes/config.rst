@@ -8,7 +8,9 @@ configuration system for research. In addition to the general tasks, that access
 functionalities:
 
 #. The config have ``_C.key:value``  field, which will use a pre-defined config first. Values in the pre-defined config will 
+
 be overwritten in sub-configs, if there are any according to requirements. We provided several base configs for standard model 
+
 architectures as ``task.yaml`` files.
 
 ``config`` has a very limited abstraction. We do not expect all features in Connectomics to be available through configs. If you need 
