@@ -20,6 +20,7 @@ Basic Usage
 
 Some basic usage of the ``CfgNode`` object is shown here.
 .. code-block:: none
+
     from yacs.config import CfgNode as CN
     _C = CN()  # config definition
     _C.SYSTEM = CN()   # config definition for GPU and CPU
@@ -29,6 +30,7 @@ Some basic usage of the ``CfgNode`` object is shown here.
 The configs in Connectomics also accepts command line configuration overwrite, i.e.: Key-value pairs provided in the command line will 
 overwrite the existing values in the config file. For example, ``main.py`` can be used with to modify input file name :
 .. code-block:: none
+
     python -u scripts/main.py \
     --config-file configs/Lucchi-Mitochondria.yaml DATASET.IMAGE_NAME ‘img/train_im.h5’
   
