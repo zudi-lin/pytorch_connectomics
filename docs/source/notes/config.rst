@@ -42,8 +42,9 @@ lin/pytorch_connectomics/blob/master/connectomics/config/config.py>`
 
 Best Practice with Configs
 ==========================
-#. Treat the configs you write as “code”: avoid copying them or duplicating them; use ``_BASE_`` to share common parts between 
-configs.
+
+#. Treat the configs you write as “code”: avoid copying them or duplicating them; use ``_BASE_`` to share common parts between configs.
+
 #. Keep the configs you write simple: don’t include keys that do not affect the experimental setting.
 
   
