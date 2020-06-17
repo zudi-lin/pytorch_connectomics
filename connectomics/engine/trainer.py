@@ -39,7 +39,12 @@ class Trainer(object):
             self.augmentor = build_train_augmentor(self.cfg)
         else:
             self.augmentor = None
-        self.dataloader = build_dataloader(self.cfg, self.augmentor, self.mode)
+        if cfg.DATASET.DO_CHUNK_TITLE==0:
+            self.dataloader = build_dataloader(self.cfg, self.augmentor, self.mode)
+            self.dataloader = iter(self.dataloader)
+        else:
+            self.dataset=None
+            self.dataloader=None
         self.monitor = build_monitor(self.cfg)
         self.criterion = build_criterion(self.cfg, self.device)
 
@@ -228,3 +233,23 @@ class Trainer(object):
             # load iteration
             if 'iteration' in checkpoint.keys():
                 self.start_iter = checkpoint['iteration']
+    def run_chunk(self, mode):
+        self.dataset = get_dataset(self.cfg, self.augmentor, mode)
+        if mode=='train':
+            num_chunk = (self.cfg.SOLVER.ITERATION_TOTAL-self.start_iter) // self.cfg.DATASET.DATA_CHUNK_ITER
+            self.cfg.SOLVER.ITERATION_TOTAL = self.cfg.DATASET.DATA_CHUNK_ITER
+            for chunk in range(num_chunk):
+                self.dataset.updatechunk()
+                self.dataloader=build_dataloader(self.cfg, mode, dataset=self.dataset.dataset)
+                self.train()
+                self.start_iter+=self.cfg.DATASET.DATA_CHUNK_ITER
+                del self.dataloader
+        else:
+            num_chunk = len(self.dataset.chunk_num_ind)
+            for chunk in range(num_chunk):
+                self.dataset.updatechunk(do_load=False)
+                self.cfg.INFERENCE.OUTPUT_NAME = 'result-' + self.dataset.get_coord_name() + '.h5'
+                if not os.path.exists(os.path.join(self.output_dir, self.cfg.INFERENCE.OUTPUT_NAME)):
+                    self.dataset.loadchunk()
+                    self.dataloader = build_dataloader(self.cfg, mode, dataset=self.dataset.dataset)
+                    self.test()
