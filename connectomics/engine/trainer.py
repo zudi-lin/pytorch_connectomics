@@ -79,7 +79,7 @@ class Trainer(object):
 
             # compute gradient
             loss.backward()
-            if (iteration+1) % self.cfg.SOLVER.ITERATION_STEP == 0:
+            if (iter_total+1) % self.cfg.SOLVER.ITERATION_STEP == 0:
                 self.optimizer.step()
                 self.optimizer.zero_grad()
 
@@ -196,7 +196,7 @@ class Trainer(object):
     # -----------------------------------------------------------------------------
     def save_checkpoint(self, iteration):
         state = {'iteration': iteration + 1,
-                 'state_dict': self.model.module.state_dict(), # Saving torch.nn.DataParallel Models
+                 'state_dict': self.model.state_dict(), # Saving torch.nn.DataParallel Models
                  'optimizer': self.optimizer.state_dict(),
                  'lr_scheduler': self.lr_scheduler.state_dict()}
                  
