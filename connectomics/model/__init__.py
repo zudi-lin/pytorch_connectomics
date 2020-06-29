@@ -31,6 +31,10 @@ def build_model(cfg, device, checkpoint=None):
         if cfg.MODEL.EXACT: 
             # exact matching: the weights shape in pretrain model and current model are identical
             weight = torch.load(checkpoint)
+            # state_dict might be saved with other parameters in
+            # trainer.py #line 200 save_checkpoint()
+            if 'state_dict' in weight.keys():
+                weight = weight['state_dict']
             # change channels if needed
             if cfg.MODEL.PRE_MODEL_LAYER[0] != '':
                 if cfg.MODEL.PRE_MODEL_LAYER_SELECT[0]==-1: # replicate channels
@@ -45,6 +49,10 @@ def build_model(cfg, device, checkpoint=None):
         else:
             pretrained_dict = torch.load(cfg.MODEL.PRE_MODEL)
             model_dict = model.state_dict()
+            # state_dict might be saved with other parameters in
+            # trainer.py #line 200 save_checkpoint()
+            if 'state_dict' in model_dict.keys():
+                model_dict = model_dict['state_dict']
             # 1. filter out unnecessary keys
             pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
             # 2. overwrite entries in the existing state dict 

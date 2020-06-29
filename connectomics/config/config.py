@@ -77,11 +77,11 @@ _C.MODEL.SIZE_MATCH = True
 
 _C.MODEL.PRE_MODEL = ''
 
-_C.MODEL.PRE_MODEL_LAYER = ''
+_C.MODEL.PRE_MODEL_LAYER = []
 
 _C.MODEL.PRE_MODEL_ITER = 0
 
-_C.MODEL.PRE_MODEL_LAYER_SELECT = -1
+_C.MODEL.PRE_MODEL_LAYER_SELECT = [-1]
 
 # -----------------------------------------------------------------------------
 # Dataset

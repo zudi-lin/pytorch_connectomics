@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html4" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript">
@@ -39,14 +45,9 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="connectomics.model" href="../modules/model.html" />
+    <link rel="next" title="MitoEM segmentation" href="mitoem.html" />
     <link rel="prev" title="Synaptic Cleft Segmentation" href="cremi.html" /> 
 </head>
 
@@ -91,6 +92,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -114,12 +116,13 @@
 <li class="toctree-l1"><a class="reference internal" href="lucchi.html">Mitochondria Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cremi.html">Synaptic Cleft Segmentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Synaptic Partner Segmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mitoem.html">MitoEM segmentation</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Package Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../modules/model.html">connectomics.model</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../modules/model.html#module-connectomics.model.block">Building Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../modules/model.html#module-connectomics.model.zoo">Model Zoo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/model.html#building-blocks">Building Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/model.html#model-zoo">Model Zoo</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/augmentation.html">connectomics.data.augmentation</a></li>
@@ -130,6 +133,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -168,7 +172,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Synaptic Partner Segmentation</li>
     
@@ -201,7 +205,7 @@ The evaluation of the synapse detection results is based on the F1 score. The sp
 region</strong> (union of the first two channels), respectively.</p>
 </div>
 <p>All the scripts needed for this tutorial can be found at <code class="docutils literal"><span class="pre">pytorch_connectomics/scripts/</span></code>.
-The pytorch dataset class of synaptic partners is <a class="reference internal" href="../modules/datasets.html#connectomics.data.dataset.VolumeDataset" title="connectomics.data.dataset.VolumeDataset"><code class="xref py py-class docutils literal"><span class="pre">connectomics.data.dataset.VolumeDataset</span></code></a>.</p>
+The pytorch dataset class of synaptic partners is <code class="xref py py-class docutils literal"><span class="pre">connectomics.data.dataset.VolumeDataset</span></code>.</p>
 <ol class="arabic">
 <li><p class="first">Dataset examples can be found on the Harvard RC server here:</p>
 <blockquote>
@@ -275,7 +279,7 @@ the <code class="docutils literal"><span class="pre">INFERENCE.IMAGE_NAME</span>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../modules/model.html" class="btn btn-neutral float-right" title="connectomics.model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="mitoem.html" class="btn btn-neutral float-right" title="MitoEM segmentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="cremi.html" class="btn btn-neutral float-left" title="Synaptic Cleft Segmentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -287,11 +291,19 @@ the <code class="docutils literal"><span class="pre">INFERENCE.IMAGE_NAME</span>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Zudi Lin and Donglai Wei
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -302,7 +314,6 @@ the <code class="docutils literal"><span class="pre">INFERENCE.IMAGE_NAME</span>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
