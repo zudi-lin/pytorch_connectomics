@@ -71,3 +71,7 @@ The pytorch dataset class of synaptic partners is :class:`connectomics.data.data
     .. note::
         By default the path of images for inference are not specified. Please change 
         the ``INFERENCE.IMAGE_NAME`` option in ``configs/Synaptic-Partner-Segmentation.yaml``.
+
+#.  Load the inferenced output onto the noise removal script at ``scripts/noise_removal.ipynb``.
+
+#.  Analyse your results and save the processed output as both H5 file and PNG images at an appropriate location.
