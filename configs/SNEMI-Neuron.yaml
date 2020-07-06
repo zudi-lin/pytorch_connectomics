@@ -13,30 +13,11 @@ MODEL:
   TARGET_OPT: ['2']
   WEIGHT_OPT: [['1']]
 DATASET:
-  IMAGE_NAME: 'img/train-input.tif'
-  LABEL_NAME: 'label/train_labels.tif'
+  IMAGE_NAME: 'train_image.h5'
+  LABEL_NAME: 'train_label.h5'
   INPUT_PATH: '/path/to/SNEMI/'
   OUTPUT_PATH: 'outputs/SNEMI/'
   PAD_SIZE: [4, 128, 128]
-AUGMENTOR:
-  ROTATE: 
-    ENABLED: True
-  RESCALE:
-    ENABLED: True
-  FLIP:
-    ENABLED: True
-  ELASTIC:
-    ENABLED: True
-  GRAYSCALE:
-    ENABLED: True
-  MISSINGPARTS:
-    ENABLED: True
-  MISSINGSECTION:
-    ENABLED: True
-  MISALIGNMENT:
-    ENABLED: True
-  MOTIONBLUR:
-    ENABLED: True
 SOLVER:
   LR_SCHEDULER_NAME: "MultiStepLR"
   BASE_LR: 0.001

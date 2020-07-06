@@ -12,6 +12,8 @@ from .misalign import MisAlignment
 from .missing_section import MissingSection
 from .missing_parts import MissingParts
 from .motion_blur import MotionBlur
+from .cutblur import CutBlur
+from .cutnoise import CutNoise
 
 __all__ = ['Compose',
            'DataAugment', 
@@ -24,10 +26,15 @@ __all__ = ['Compose',
            'MissingParts',
            'Flip',
            'MotionBlur',
+           'CutBlur',
+           'CutNoise',
            'TestAugmentor']
 
 
-def build_train_augmentor(cfg):
+def build_train_augmentor(cfg, keep_uncropped=False, keep_non_smoothed=False):
+    # The two arguments, keep_uncropped and keep_non_smoothed, are used only
+    # for debugging, which are False by defaults and can not be adjusted
+    # in the config files.
     aug_list = []
     #1. rotate
     if cfg.AUGMENTOR.ROTATE.ENABLED:
@@ -56,13 +63,29 @@ def build_train_augmentor(cfg):
     #8. misalignment
     if cfg.AUGMENTOR.MISALIGNMENT.ENABLED:
         aug_list.append(MisAlignment(p=cfg.AUGMENTOR.MISALIGNMENT.P, 
-                                     displacement=cfg.AUGMENTOR.MISALIGNMENT.DISPLACEMENT))
+                                     displacement=cfg.AUGMENTOR.MISALIGNMENT.DISPLACEMENT,
+                                     rotate_ratio=cfg.AUGMENTOR.MISALIGNMENT.ROTATE_RATIO))
     #9. motion-blur
     if cfg.AUGMENTOR.MOTIONBLUR.ENABLED:
         aug_list.append(MotionBlur(p=cfg.AUGMENTOR.MOTIONBLUR.P, 
                                    sections=cfg.AUGMENTOR.MOTIONBLUR.SECTIONS, 
                                    kernel_size=cfg.AUGMENTOR.MOTIONBLUR.KERNEL_SIZE))
 
-    augmentor = Compose(aug_list, input_size = cfg.MODEL.INPUT_SIZE, smooth=cfg.AUGMENTOR.SMOOTH)
+    #10. cut-blur
+    if cfg.AUGMENTOR.CUTBLUR.ENABLED:
+        aug_list.append(CutBlur(p=cfg.AUGMENTOR.CUTBLUR.P, 
+                                length_ratio=cfg.AUGMENTOR.CUTBLUR.LENGTH_RATIO, 
+                                down_ratio_min=cfg.AUGMENTOR.CUTBLUR.DOWN_RATIO_MIN,
+                                down_ratio_max=cfg.AUGMENTOR.CUTBLUR.DOWN_RATIO_MAX,
+                                downsample_z=cfg.AUGMENTOR.CUTBLUR.DOWNSAMPLE_Z))
+
+    #11. cut-noise
+    if cfg.AUGMENTOR.CUTNOISE.ENABLED:
+        aug_list.append(CutNoise(p=cfg.AUGMENTOR.CUTNOISE.P, 
+                                length_ratio=cfg.AUGMENTOR.CUTNOISE.LENGTH_RATIO, 
+                                scale=cfg.AUGMENTOR.CUTNOISE.SCALE))
+
+    augmentor = Compose(aug_list, input_size=cfg.MODEL.INPUT_SIZE, smooth=cfg.AUGMENTOR.SMOOTH,
+                        keep_uncropped=keep_uncropped, keep_non_smoothed=keep_non_smoothed)
 
     return augmentor

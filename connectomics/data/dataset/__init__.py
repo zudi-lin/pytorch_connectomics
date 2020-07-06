@@ -18,7 +18,11 @@ __all__ = ['VolumeDataset',
 def _get_input(cfg, mode='train'):
     dir_name = cfg.DATASET.INPUT_PATH.split('@')
     img_name = cfg.DATASET.IMAGE_NAME.split('@')
-    img_name = [dir_name[0] + x for x in img_name]
+    assert len(dir_name) == 1 or len(dir_name) == len(img_name)
+    if len(dir_name) == 1:
+        img_name = [os.path.join(dir_name[0], x) for x in img_name]
+    else:
+        img_name = [os.path.join(dir_name[i], img_name[i]) for i in range(len(img_name))]
 
     label = None
     volume = [None]*len(img_name)
@@ -89,15 +93,15 @@ def get_dataset(cfg, augmentor, mode='train'):
                               chunk_stride=cfg.DATASET.DATA_CHUNK_STRIDE,
                               volume_json=cfg.DATASET.INPUT_PATH+cfg.DATASET.IMAGE_NAME, 
                               label_json=label_json,
-                              sample_volume_size=sample_volume_size, 
+                              sample_input_size=sample_volume_size, 
                               sample_label_size=sample_label_size,
                               sample_stride=sample_stride, 
-                              sample_invalid_thres = sample_invalid_thres,
+                              sample_invalid_thres=sample_invalid_thres,
                               augmentor=augmentor, 
-                              target_opt = topt, 
-                              weight_opt = wopt, 
-                              mode = mode, 
-                              label_erosion = label_erosion, 
+                              target_opt=topt, 
+                              weight_opt=wopt, 
+                              mode=mode, 
+                              label_erosion=label_erosion, 
                               pad_size=cfg.DATASET.PAD_SIZE)
 
     else:

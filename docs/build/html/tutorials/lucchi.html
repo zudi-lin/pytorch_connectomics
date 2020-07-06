@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mitochondria Segmentation &mdash; connectomics master documentation</title>
+  <title>Mitochondria Segmentation &mdash; connectomics latest documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../',
-              VERSION:'master',
+              VERSION:'latest',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -46,7 +46,7 @@
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Synaptic Cleft Segmentation" href="cremi.html" />
+    <link rel="next" title="MitoEM Instance Segmentation" href="mitoem.html" />
     <link rel="prev" title="Neuron Segmentation" href="snemi.html" /> 
 </head>
 
@@ -74,7 +74,7 @@
             
             
               <div class="version">
-                master (0.1)
+                latest
               </div>
             
           
@@ -101,12 +101,19 @@
               <p class="caption"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notes/config.html">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/config.html">Configurations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/config.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/config.html#multiple-losses-for-a-single-learning-target">Multiple Losses for a Single Learning Target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/config.html#multitask-learning">Multitask Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/config.html#inference">Inference</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="snemi.html">Neuron Segmentation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Mitochondria Segmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mitoem.html">MitoEM Instance Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cremi.html">Synaptic Cleft Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="synaptic_partner.html">Synaptic Partner Segmentation</a></li>
 </ul>
@@ -195,7 +202,8 @@ the models used in affinity prediction in <a class="reference external" href="ht
 which means the spatial resolution along all three axes is the same. Therefore a completely 3D U-Net and data augmentation along z-x
 and z-y planes besides x-y planes are preferred.</p>
 </div>
-<p>All the scripts needed for this tutorial can be found at <code class="docutils literal"><span class="pre">pytorch_connectomics/scripts/</span></code>. Need to pass the argument <code class="docutils literal"><span class="pre">--config-file</span> <span class="pre">configs/Lucchi-Mitochondria.yaml</span></code> during training and inference to load the required configurations for this task. The pytorch dataset class of lucchi data is <code class="xref py py-class docutils literal"><span class="pre">torch_connectomics.data.dataset.VolumeDataset</span></code>.</p>
+<p>All the scripts needed for this tutorial can be found at <code class="docutils literal"><span class="pre">pytorch_connectomics/scripts/</span></code>. Need to pass the argument <code class="docutils literal"><span class="pre">--config-file</span> <span class="pre">configs/Lucchi-Mitochondria.yaml</span></code> during training and inference to load the required configurations for this task.
+The pytorch dataset class of lucchi data is <a class="reference internal" href="../modules/datasets.html#connectomics.data.dataset.VolumeDataset" title="connectomics.data.dataset.VolumeDataset"><code class="xref py py-class docutils literal"><span class="pre">connectomics.data.dataset.VolumeDataset</span></code></a>.</p>
 <ol class="arabic">
 <li><p class="first">Get the dataset:</p>
 <blockquote>
@@ -248,7 +256,7 @@ $ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python -u scripts/main.py \
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="cremi.html" class="btn btn-neutral float-right" title="Synaptic Cleft Segmentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="mitoem.html" class="btn btn-neutral float-right" title="MitoEM Instance Segmentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="snemi.html" class="btn btn-neutral float-left" title="Neuron Segmentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

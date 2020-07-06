@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>connectomics.data.dataset.dataset_volume &mdash; connectomics master documentation</title>
+  <title>connectomics.data.dataset.dataset_volume &mdash; connectomics latest documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'../../../../',
-              VERSION:'master',
+              VERSION:'latest',
               LANGUAGE:'None',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -72,7 +72,7 @@
             
             
               <div class="version">
-                master (0.1)
+                latest
               </div>
             
           
@@ -99,12 +99,19 @@
               <p class="caption"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../notes/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../notes/config.html">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/config.html">Configurations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/config.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/config.html#multiple-losses-for-a-single-learning-target">Multiple Losses for a Single Learning Target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/config.html#multitask-learning">Multitask Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/config.html#inference">Inference</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/snemi.html">Neuron Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/lucchi.html">Mitochondria Segmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/mitoem.html">MitoEM Instance Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cremi.html">Synaptic Cleft Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/synaptic_partner.html">Synaptic Partner Segmentation</a></li>
 </ul>
@@ -425,14 +432,14 @@
         <span class="n">pos_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">label_vol_ratio</span><span class="p">)</span>
         <span class="n">out_label</span> <span class="o">=</span> <span class="n">crop_volume</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_label_size</span><span class="p">,</span> <span class="n">pos_l</span><span class="p">)</span>
 
-        <span class="c1"># The option of generating valid masks has been removed.</span>
+        <span class="c1"># The option of generating valid masks has been deprecated.</span>
         <span class="c1"># if self.sample_invalid_thres[0]&gt;0:</span>
         <span class="c1">#     seg_bad = np.array([-1]).astype(out_label.dtype)[0]</span>
         <span class="c1">#     out_mask = out_label!=seg_bad</span>
         <span class="c1"># else:</span>
         <span class="c1">#     out_mask = torch.ones((1),dtype=torch.uint8)</span>
 
-        <span class="n">out_label</span> <span class="o">=</span> <span class="n">relabel</span><span class="p">(</span><span class="n">out_label</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">out_label</span> <span class="o">=</span> <span class="n">relabel</span><span class="p">(</span><span class="n">out_label</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pos</span><span class="p">,</span> <span class="n">out_input</span><span class="p">,</span> <span class="n">out_label</span></div>
 </pre></div>
 
