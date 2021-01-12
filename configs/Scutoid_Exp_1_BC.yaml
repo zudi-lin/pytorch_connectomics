@@ -1,0 +1,41 @@
+# For binary mask & instance contour prediction.
+# All other configurations are set by default. If you want to add new config options,
+# please modify ../connectomics/config/config.py
+# 30x8x8 nm in (z,y,x), 1000x4096x4096 voxel
+SYSTEM:
+  NUM_GPUS: 4
+  NUM_CPUS: 4
+MODEL:
+  ARCHITECTURE: 'unet_residual_3d'
+  INPUT_SIZE: [32, 256, 256]
+  OUTPUT_SIZE: [32, 256, 256]
+  IN_PLANES: 1
+  OUT_PLANES: 2
+  LOSS_OPTION: [['WeightedBCE'], ['WeightedBCE']]
+  LOSS_WEIGHT: [[1.0], [1.0]]
+  TARGET_OPT: ['0','4-2-1']
+  WEIGHT_OPT: [['1'],['1']]
+DATASET:
+  IMAGE_NAME: 'Raw_LateralMembranes/vol00.tif'
+  LABEL_NAME: 'Labelled/vol00.tif'
+  INPUT_PATH: '/n/pfister_lab2/Lab/vcg_connectomics/LM/Cysts_Dec2020/'
+  OUTPUT_PATH: 'outputs/Scutoid_Exp_1/'
+  PAD_SIZE: [16, 128, 128]
+SOLVER:
+  LR_SCHEDULER_NAME: "WarmupMultiStepLR"
+  BASE_LR: 1e-03
+  ITERATION_STEP: 1
+  ITERATION_SAVE: 200
+  ITERATION_TOTAL: 100000
+  SAMPLES_PER_BATCH: 4
+INFERENCE:
+  INPUT_SIZE: [32, 256, 256]
+  OUTPUT_SIZE: [32, 256, 256]
+  IMAGE_NAME: 'Raw_LaterMembranes/vol01.tif@Raw_LateralMembranes/vol02.tif@Raw_LateralMembranes/vol03.tif@Raw_LateralMembranes/vol04.tif@Raw_LateralMembranes/vol05.tif@Raw_LateralMembranes/vol06.tif@Raw_LateralMembranes/vol07.tif@Raw_LateralMembranes/vol08.tif@Raw_LateralMembranes/vol09.tif@Raw_LateralMembranes/vol10.tif@Raw_LateralMembranes/vol11.tif@Raw_LateralMembranes/vol12.tif@Raw_LateralMembranes/vol13.tif@Raw_LateralMembranes/vol14.tif@Raw_LateralMembranes/vol15.tif@Raw_LateralMembranes/vol16.tif@Raw_LateralMembranes/vol17.tif@Raw_LateralMembranes/vol18.tif@Raw_LateralMembranes/vol19.tif'
+  OUTPUT_PATH: 'outputs/Scutoid_Exp_1/test'
+  OUTPUT_NAME: 'result.h5'
+  PAD_SIZE: [16, 128, 128]
+  AUG_MODE: 'mean'
+  AUG_NUM: 4
+  STRIDE: [16, 128, 128]
+  SAMPLES_PER_BATCH: 16
