@@ -226,4 +226,20 @@ so make sure not to go above that value */
     display: block !important;
   }
 }
+
+/* code block */
+.highlight .o {
+  font-weight: lighter !important;
+}
+
+.highlight .n {
+  color: #000000;
+  font-weight: lighter !important;
+}
+
+.highlight .p {
+  color: #000000;
+  font-weight: lighter !important;
+}
+
 /* docsearch end */
