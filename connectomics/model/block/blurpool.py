@@ -6,8 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class BlurPool1D(nn.Module):
-    "BlurPool module for 1D inputs. Inputs need to be of the form (batch_size, num_channels, dimension)
-    "
+    """BlurPool module for 1D inputs. Inputs need to be of the form (batch_size, num_channels, dimension)
+    """"
     def __init__(self, channels, pad_type='reflect', filt_size=3, stride=2, pad_off=0):
         super(BlurPool1D, self).__init__()
         self.filt_size = filt_size
@@ -51,8 +51,8 @@ class BlurPool1D(nn.Module):
             
 
 class BlurPool(nn.Module):
-    "BlurPool module for ND inputs. Inputs need to be of the form (batch_size, num_channels, dimensions)
-    "
+    """BlurPool module for ND inputs. Inputs need to be of the form (batch_size, num_channels, dimensions)
+    """"
     def __init__(self, channels, pad_type='reflect', filt_size=4, stride=2, pad_off=0):
         super(BlurPool, self).__init__()
         self.filt_size = filt_size
