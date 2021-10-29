@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from .arch import UNet3D, UNet2D, FPN3D, DeepLabV3, UNetPlus3D
+from .arch import UNet3D, UNet2D, FPN3D, DeepLabV3, UNetPlus3D, SwinTransformer2D, SwinTransformer3D
 from .backbone import RepVGG3D
 
 MODEL_MAP = {
@@ -13,6 +13,8 @@ MODEL_MAP = {
     'deeplabv3a': DeepLabV3,
     'deeplabv3b': DeepLabV3,
     'deeplabv3c': DeepLabV3,
+    'swintransformer2d' : SwinTransformer2D,
+    'swintransformer3d': SwinTransformer3D,
 }
 
 
@@ -46,6 +48,35 @@ def build_model(cfg, device, rank=None):
         kwargs['name'] = model_arch
         kwargs['backbone_type'] = cfg.MODEL.BACKBONE
         kwargs['aux_out'] = cfg.MODEL.AUX_OUT
+    
+    if model_arch[:15] == 'swintransformer':
+        kwargs = {
+        'patch_size': cfg.MODEL.PATCH_SIZE,
+        'in_channel': cfg.MODEL.IN_PLANES,
+        'depths': cfg.MODEL.DEPTHS,
+        'num_heads': cfg.MODEL.NUM_HEADS,
+        'window_size': cfg.MODEL.WINDOW_SIIE,
+        'mlp_ratio': cfg.MODEL.MLP_RATIO,
+        'qkv_bias': cfg.MODEL.QKV_BIAS,
+        'qk_scale': cfg.MODEL.QK_SCALE,
+        'drop_rate': cfg.MODEL.DROP_RATE,
+        'attn_drop_rate': cfg.MODEL.ATTN_DROP_RATE,
+        'drop_path_rate': cfg.MODEL.DROP_PATH_RATE,
+        # 'norm_layer': cfg.MODEL.NORM_LAYER,
+        'embed_dim': cfg.MODEL.EMBED_DIM,
+        'patch_norm': cfg.MODEL.PATCH_NORM,
+        
+        'frozen_stages': cfg.MODEL.FROZEN_STAGES,
+        'use_checkpoint': cfg.MODEL.USE_CHECKPOINT,
+        # 'pretrain_img_size': cfg.MODEL.PRETRAIN_IMG_SIZE,
+        }
+        if model_arch[15:17] == '2d':
+            kwargs['pretrain_img_size'] = cfg.MODEL.PRETRAIN_IMG_SIZE
+            kwargs['ape'] = cfg.MODEL.APE
+            kwargs['out_indices'] = cfg.MODEL.OUT_INDICES
+        if model_arch[15:17] == '3d':
+            kwargs['pretrained'] = cfg.MODEL.PRETRAINED
+            kwargs['pretrained2d'] = cfg.MODEL.PRETRAINED2D
 
     model = MODEL_MAP[cfg.MODEL.ARCHITECTURE](**kwargs)
     print('model: ', model.__class__.__name__)
