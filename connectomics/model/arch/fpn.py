@@ -77,6 +77,11 @@ class FPN3D(nn.Module):
             'attention': attn,
         }
         backbone_kwargs.update(self.shared_kwargs)
+        self.swin = False
+        if backbone_type == 'swintransformer3d':
+            backbone_kwargs.update(kwargs)
+            self.shared_kwargs['norm_mode'] = 'layer'
+            self.swin = True
 
         self.backbone = build_backbone(
             backbone_type, feature_keys, **backbone_kwargs)
@@ -84,14 +89,14 @@ class FPN3D(nn.Module):
 
         self.latplanes = filters[0]
         self.latlayers = nn.ModuleList([
-            conv3d_norm_act(x, self.latplanes, kernel_size=1, padding=0,
+            conv3d_norm_act(x, self.latplanes, kernel_size=1, padding=0, swin=self.swin,
                             **self.shared_kwargs) for x in filters])
 
         self.smooth = nn.ModuleList()
         for i in range(self.depth):
             kernel_size, padding = self._get_kernel_size(isotropy[i])
             self.smooth.append(conv3d_norm_act(
-                self.latplanes, self.latplanes, kernel_size=kernel_size,
+                self.latplanes, self.latplanes, kernel_size=kernel_size, swin=self.swin,
                 padding=padding, **self.shared_kwargs))
 
         self.conv_out = self._get_io_conv(out_channel, isotropy[0])
@@ -138,4 +143,4 @@ class FPN3D(nn.Module):
         return conv3d_norm_act(
             self.filters[0], out_channel, kernel_size_io, padding=padding_io,
             pad_mode=self.shared_kwargs['pad_mode'], bias=True,
-            act_mode='none', norm_mode='none')
+            act_mode='none', norm_mode='none',swin=self.swin,)

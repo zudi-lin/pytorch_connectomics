@@ -7,6 +7,7 @@ from .resnet import ResNet3D
 from .repvgg import RepVGG3D
 from .botnet import BotNet3D
 from .efficientnet import EfficientNet3D
+from .swintr import SwinTransformer2D,SwinTransformer3D
 from ..utils.misc import IntermediateLayerGetter
 
 backbone_dict = {
@@ -14,13 +15,15 @@ backbone_dict = {
     'repvgg': RepVGG3D,
     'botnet': BotNet3D,
     'efficientnet': EfficientNet3D,
+    'swintransformer2d': SwinTransformer2D,
+    'swintransformer3d': SwinTransformer3D,
 }
 
 
 def build_backbone(backbone_type: str,
                    feat_keys: List[str],
                    **kwargs):
-    assert backbone_type in ['resnet', 'repvgg', 'botnet', 'efficientnet']
+    assert backbone_type in ['resnet', 'repvgg', 'botnet', 'efficientnet','swintransformer2d','swintransformer3d']
     return_layers = {'layer0': feat_keys[0],
                      'layer1': feat_keys[1],
                      'layer2': feat_keys[2],
@@ -28,5 +31,8 @@ def build_backbone(backbone_type: str,
                      'layer4': feat_keys[4]}
 
     backbone = backbone_dict[backbone_type](**kwargs)
-    assert len(feat_keys) == backbone.num_stages
+    if backbone_type[:15] =='swintransformer':
+        assert len(feat_keys) == backbone.num_layers
+    else:
+        assert len(feat_keys) == backbone.num_stages
     return IntermediateLayerGetter(backbone, return_layers)

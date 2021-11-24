@@ -1,3 +1,4 @@
+# Code adapted from https://github.com/microsoft/Swin-Transformer
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -5,8 +6,8 @@ import torch.utils.checkpoint as checkpoint
 import numpy as np
 from timm.models.layers import DropPath, trunc_normal_,to_2tuple
 
-from mmcv.runner import load_checkpoint
-from mmaction.utils import get_root_logger
+# from mmcv.runner import load_checkpoint
+# from mmaction.utils import get_root_logger
 
 from functools import reduce, lru_cache
 from operator import mul
@@ -312,7 +313,6 @@ class SwinTransformerBlock3D(nn.Module):
     def forward_part1(self, x, mask_matrix):
         B, D, H, W, C = x.shape
         window_size, shift_size = get_window_size_3d((D, H, W), self.window_size, self.shift_size)
-
         x = self.norm1(x)
         # pad feature maps to multiples of window size
         pad_l = pad_t = pad_d0 = 0
@@ -475,11 +475,17 @@ class PatchMerging3D(nn.Module):
         dim (int): Number of input channels.
         norm_layer (nn.Module, optional): Normalization layer.  Default: nn.LayerNorm
     """
-    def __init__(self, dim, norm_layer=nn.LayerNorm):
+    def __init__(self, dim, norm_layer=nn.LayerNorm,isotropy=False):
         super().__init__()
         self.dim = dim
-        self.reduction = nn.Linear(4 * dim, 2 * dim, bias=False)
-        self.norm = norm_layer(4 * dim)
+        self.isotropy = isotropy
+        if self.isotropy:
+            self.reduction = nn.Linear(8 * dim, 2 * dim, bias=False)
+            self.norm = norm_layer(8*dim)
+        else:    
+            self.reduction = nn.Linear(4 * dim, 2 * dim, bias=False)
+            self.norm = norm_layer(4 * dim)
+
 
     def forward(self, x):
         """ Forward function.
@@ -493,13 +499,27 @@ class PatchMerging3D(nn.Module):
         if pad_input:
             x = F.pad(x, (0, 0, 0, W % 2, 0, H % 2))
 
-        x0 = x[:, :, 0::2, 0::2, :]  # B D H/2 W/2 C
-        x1 = x[:, :, 1::2, 0::2, :]  # B D H/2 W/2 C
-        x2 = x[:, :, 0::2, 1::2, :]  # B D H/2 W/2 C
-        x3 = x[:, :, 1::2, 1::2, :]  # B D H/2 W/2 C
-        x = torch.cat([x0, x1, x2, x3], -1)  # B D H/2 W/2 4*C
+        if self.isotropy:
+            x0 = x[:, 0::2, 0::2, 0::2, :]  # B D/2 H/2 W/2 C
+            x1 = x[:, 0::2, 1::2, 0::2, :]  # B D/2 H/2 W/2 C
+            x2 = x[:, 0::2, 0::2, 1::2, :]  # B D/2 H/2 W/2 C
+            x3 = x[:, 0::2, 1::2, 1::2, :]  # B D/2 H/2 W/2 C
+            x4 = x[:, 1::2, 0::2, 0::2, :]  # B D/2 H/2 W/2 C
+            x5 = x[:, 1::2, 1::2, 0::2, :]  # B D/2 H/2 W/2 C
+            x6 = x[:, 1::2, 0::2, 1::2, :]  # B D/2 H/2 W/2 C
+            x7 = x[:, 1::2, 1::2, 1::2, :]  # B D/2 H/2 W/2 C
 
-        x = self.norm(x)
+            x = torch.cat([x0, x1, x2, x3,x4, x5, x6, x7], -1)  # B D/2 H/2 W/2 8*C
+
+        else:
+            x0 = x[:, :, 0::2, 0::2, :]  # B D H/2 W/2 C
+            x1 = x[:, :, 1::2, 0::2, :]  # B D H/2 W/2 C
+            x2 = x[:, :, 0::2, 1::2, :]  # B D H/2 W/2 C
+            x3 = x[:, :, 1::2, 1::2, :]  # B D H/2 W/2 C
+
+            x = torch.cat([x0, x1, x2, x3], -1)  # B D H/2 W/2 4*C
+
+        x = self.norm(x)    
         x = self.reduction(x)
 
         return x
@@ -555,7 +575,7 @@ def compute_mask(D, H, W, window_size, shift_size, device):
             for w in slice(-window_size[2]), slice(-window_size[2], -shift_size[2]), slice(-shift_size[2],None):
                 img_mask[:, d, h, w, :] = cnt
                 cnt += 1
-    mask_windows = window_partition(img_mask, window_size)  # nW, ws[0]*ws[1]*ws[2], 1
+    mask_windows = window_partition_3d(img_mask, window_size)  # nW, ws[0]*ws[1]*ws[2], 1
     mask_windows = mask_windows.squeeze(-1)  # nW, ws[0]*ws[1]*ws[2]
     attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
     attn_mask = attn_mask.masked_fill(attn_mask != 0, float(-100.0)).masked_fill(attn_mask == 0, float(0.0))
@@ -591,6 +611,7 @@ class BasicLayer3D(nn.Module):
                  drop_path=0.,
                  norm_layer=nn.LayerNorm,
                  downsample=None,
+                 isotropy=False,
                  use_checkpoint=False):
         super().__init__()
         self.window_size = window_size
@@ -618,7 +639,7 @@ class BasicLayer3D(nn.Module):
         
         self.downsample = downsample
         if self.downsample is not None:
-            self.downsample = downsample(dim=dim, norm_layer=norm_layer)
+            self.downsample = downsample(dim=dim, norm_layer=norm_layer,isotropy=isotropy)
 
     def forward(self, x):
         """ Forward function.
@@ -854,8 +875,8 @@ class SwinTransformer3D(nn.Module):
                  patch_size=(4,4,4),
                  in_channel=3,
                  embed_dim=96,
-                 depths=[2, 2, 6, 2],
-                 num_heads=[3, 6, 12, 24],
+                 depths=[2, 2, 2, 2, 2],
+                 num_heads=[3, 6, 12, 18, 24],
                  window_size=(2,7,7),
                  mlp_ratio=4.,
                  qkv_bias=True,
@@ -867,6 +888,7 @@ class SwinTransformer3D(nn.Module):
                  patch_norm=False,
                  frozen_stages=-1,
                  use_checkpoint=False,
+                 isotropy = [False,False,False,False,False],
                  **kwargs):
         super().__init__()
 
@@ -878,7 +900,10 @@ class SwinTransformer3D(nn.Module):
         self.frozen_stages = frozen_stages
         self.window_size = window_size
         self.patch_size = patch_size
-
+        self.isotropy = isotropy
+        assert len(self.isotropy) == self.num_layers
+        assert len(num_heads) == self.num_layers
+        assert self.num_layers == 5
         # split image into non-overlapping patches
         self.patch_embed = PatchEmbed3D(
             patch_size=patch_size, in_channel=in_channel, embed_dim=embed_dim,
@@ -890,7 +915,7 @@ class SwinTransformer3D(nn.Module):
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule
 
         # build layers
-        self.layers = nn.ModuleList()
+        layers = nn.ModuleList()
         for i_layer in range(self.num_layers):
             layer = BasicLayer3D(
                 dim=int(embed_dim * 2**i_layer),
@@ -905,8 +930,15 @@ class SwinTransformer3D(nn.Module):
                 drop_path=dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
                 norm_layer=norm_layer,
                 downsample=PatchMerging3D if i_layer<self.num_layers-1 else None,
+                isotropy=isotropy[i_layer],
                 use_checkpoint=use_checkpoint)
-            self.layers.append(layer)
+            layers.append(layer)
+
+        self.layer0 = layers[0]
+        self.layer1 = layers[1]
+        self.layer2 = layers[2]
+        self.layer3 = layers[3]
+        self.layer4 = layers[4]
 
         self.num_features = int(embed_dim * 2**(self.num_layers-1))
 
@@ -995,36 +1027,48 @@ class SwinTransformer3D(nn.Module):
                 nn.init.constant_(m.bias, 0)
                 nn.init.constant_(m.weight, 1.0)
 
-        if pretrained:
-            self.pretrained = pretrained
-        if isinstance(self.pretrained, str):
-            self.apply(_init_weights)
-            logger = get_root_logger()
-            logger.info(f'load model from: {self.pretrained}')
+        # if pretrained:
+        #     self.pretrained = pretrained
+        # if isinstance(self.pretrained, str):
+        #     self.apply(_init_weights)
+        #     logger = get_root_logger()
+        #     logger.info(f'load model from: {self.pretrained}')
 
-            if self.pretrained2d:
-                # Inflate 2D model into 3D model.
-                self.inflate_weights(logger)
-            else:
-                # Directly load 3D model.
-                load_checkpoint(self, self.pretrained, strict=False, logger=logger)
-        elif self.pretrained is None:
+        #     if self.pretrained2d:
+        #         # Inflate 2D model into 3D model.
+        #         self.inflate_weights(logger)
+        #     else:
+        #         # Directly load 3D model.
+        #         load_checkpoint(self, self.pretrained, strict=False, logger=logger)
+        if self.pretrained is None:
             self.apply(_init_weights)
         else:
             raise TypeError('pretrained must be a str or None')
 
     def forward(self, x):
         """Forward function."""
+        print("BEFORE PATCH EMBED",x.size())
         x = self.patch_embed(x)
+        print("AFTER PATCH EMBED",x.size())
 
         x = self.pos_drop(x)
-
+        print("AFTER POS_DROP",x.size())
+        
+        i = 0
         for layer in self.layers:
             x = layer(x.contiguous())
+            print("AFTER LAYER",i,x.size())
+            i+=1
+
 
         x = rearrange(x, 'n c d h w -> n d h w c')
+        print("AFTER FIRST REARRANGE",x.size())
+
         x = self.norm(x)
+        print("AFTER NORM",x.size())
+
         x = rearrange(x, 'n d h w c -> n c d h w')
+        print("AFTER SECOND REARRANGE",x.size())
 
         return x
 
@@ -1081,7 +1125,7 @@ class SwinTransformer2D(nn.Module):
                  out_indices=(0, 1, 2, 3),
                  frozen_stages=-1,
                  use_checkpoint=False,
-                 **kwargs):
+                 **_):
         super().__init__()
 
         self.pretrain_img_size = pretrain_img_size
@@ -1174,11 +1218,11 @@ class SwinTransformer2D(nn.Module):
                 nn.init.constant_(m.bias, 0)
                 nn.init.constant_(m.weight, 1.0)
 
-        if isinstance(pretrained, str):
-            self.apply(_init_weights)
-            logger = get_root_logger()
-            load_checkpoint(self, pretrained, strict=False, logger=logger)
-        elif pretrained is None:
+        # if isinstance(pretrained, str):
+        #     self.apply(_init_weights)
+        #     logger = get_root_logger()
+        #     load_checkpoint(self, pretrained, strict=False, logger=logger)
+        if pretrained is None:
             self.apply(_init_weights)
         else:
             raise TypeError('pretrained must be a str or None')
