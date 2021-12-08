@@ -10,7 +10,7 @@ _C = CN()
 # -----------------------------------------------------------------------------
 _C.SYSTEM = CN()
 
-_C.SYSTEM.NUM_GPUS = 1
+_C.SYSTEM.NUM_GPUS = 4
 _C.SYSTEM.NUM_CPUS = 4
 # Run distributed training using DistributedDataparallel model
 _C.SYSTEM.DISTRIBUTED = False
