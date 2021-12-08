@@ -169,7 +169,7 @@ class TestModelBlock(unittest.TestCase):
         c = cfg.MODEL.IN_PLANES
         x = torch.rand(2, c, d, h, w)
         y1 = model(x)
-        self.assertTupleEqual(tuple(y1.shape), (2, c, d//4, h//8, w//8))
+        self.assertTupleEqual(tuple(y1.shape), (2, c, d, h, w))
 
     def test_build_fpn_with_efficientnet(self):
         r"""Test building a 3D FPN model with EfficientNet3D backbone from configs.

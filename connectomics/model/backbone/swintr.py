@@ -1047,28 +1047,26 @@ class SwinTransformer3D(nn.Module):
 
     def forward(self, x):
         """Forward function."""
-        print("BEFORE PATCH EMBED",x.size())
         x = self.patch_embed(x)
-        print("AFTER PATCH EMBED",x.size())
 
         x = self.pos_drop(x)
-        print("AFTER POS_DROP",x.size())
         
-        i = 0
-        for layer in self.layers:
-            x = layer(x.contiguous())
-            print("AFTER LAYER",i,x.size())
-            i+=1
+        x = self.layer0(x.contiguous())
+
+        x = self.layer1(x.contiguous())
+
+        x = self.layer2(x.contiguous())
+
+        x = self.layer3(x.contiguous())
+
+        x = self.layer4(x.contiguous())
 
 
         x = rearrange(x, 'n c d h w -> n d h w c')
-        print("AFTER FIRST REARRANGE",x.size())
 
         x = self.norm(x)
-        print("AFTER NORM",x.size())
 
         x = rearrange(x, 'n d h w c -> n c d h w')
-        print("AFTER SECOND REARRANGE",x.size())
 
         return x
 
