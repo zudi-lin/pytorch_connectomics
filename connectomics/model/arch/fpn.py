@@ -105,6 +105,7 @@ class FPN3D(nn.Module):
         model_init(self, init_mode)
 
     def forward(self, x):
+        self.x_size = x.size()
         z = self.backbone(x)
         return self._forward_main(z)
 
@@ -119,8 +120,8 @@ class FPN3D(nn.Module):
         out = self.smooth[0](out)
         out = self.conv_out(out)
         if self.is_swin:
-            b,c,d,h,w = out.size()
-            out = F.interpolate(out,size=(4*d,8*h,8*w),mode='trilinear')
+            b,c,d,h,w = self.x_size
+            out = F.interpolate(out,size=(d,h,w),mode='trilinear')
         return out
 
     def _up_smooth_add(self, x, y, smooth):
