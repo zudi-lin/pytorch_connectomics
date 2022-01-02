@@ -54,7 +54,7 @@ class FPN3D(nn.Module):
         self.filters = filters
         self.depth = len(filters)
 
-        assert len(isotropy) == self.depth
+        # assert len(isotropy) == self.depth
         if is_isotropic:
             isotropy = [True] * self.depth
         self.isotropy = isotropy
@@ -121,7 +121,9 @@ class FPN3D(nn.Module):
         out = self.conv_out(out)
         if self.is_swin:
             b,c,d,h,w = self.x_size
-            out = F.interpolate(out,size=(d,h,w),mode='trilinear')
+            _b,_c,_d,_h,_w = out.size()
+            if _d != d or _h != h or _w != w:
+                out = F.interpolate(out,size=(d,h,w),mode='trilinear')
         return out
 
     def _up_smooth_add(self, x, y, smooth):

@@ -10,7 +10,7 @@ _C = CN()
 # -----------------------------------------------------------------------------
 _C.SYSTEM = CN()
 
-_C.SYSTEM.NUM_GPUS = 4
+_C.SYSTEM.NUM_GPUS = 1
 _C.SYSTEM.NUM_CPUS = 4
 # Run distributed training using DistributedDataparallel model
 _C.SYSTEM.DISTRIBUTED = False
@@ -121,11 +121,14 @@ _C.MODEL.QK_SCALE = None
 _C.MODEL.DROP_RATE = 0.
 _C.MODEL.ATTN_DROP_RATE = 0.
 _C.MODEL.DROP_PATH_RATE = 0.2
-# _C.MODEL.NORM_LAYER = nn.LayerNorm
+_C.MODEL.USE_CONV = False
 _C.MODEL.PATCH_NORM = False
 _C.MODEL.FROZEN_STAGES = -1
 _C.MODEL.USE_CHECKPOINT = False
 _C.MODEL.EMBED_DIM = 96
+_C.MODEL.DOWNSAMPLE_BEFORE = [True, True, True, True]
+_C.MODEL.SWIN_ISOTROPY = [True, True, True, True]
+
 
 # -----------------------------------------------------------------------------
 # Dataset

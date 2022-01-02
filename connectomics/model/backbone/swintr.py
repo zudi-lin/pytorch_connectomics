@@ -172,7 +172,6 @@ class WindowAttention3D(nn.Module):
             N, N, -1)  # Wd*Wh*Ww,Wd*Wh*Ww,nH
         relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous()  # nH, Wd*Wh*Ww, Wd*Wh*Ww
         attn = attn + relative_position_bias.unsqueeze(0) # B_, nH, N, N
-
         if mask is not None:
             nW = mask.shape[0]
             attn = attn.view(B_ // nW, nW, self.num_heads, N, N) + mask.unsqueeze(1).unsqueeze(0)
@@ -612,17 +611,19 @@ class BasicLayer3D(nn.Module):
                  norm_layer=nn.LayerNorm,
                  downsample=None,
                  isotropy=False,
+                 downsample_before=False,
                  use_checkpoint=False):
         super().__init__()
         self.window_size = window_size
         self.shift_size = tuple(i // 2 for i in window_size)
         self.depth = depth
         self.use_checkpoint = use_checkpoint
-
+        self.downsample_before = downsample_before
+        self.downsample = downsample
         # build blocks
         self.blocks = nn.ModuleList([
             SwinTransformerBlock3D(
-                dim=dim,
+                dim=dim*2 if self.downsample_before and self.downsample else dim,
                 num_heads=num_heads,
                 window_size=window_size,
                 shift_size=(0,0,0) if (i % 2 == 0) else self.shift_size,
@@ -637,7 +638,6 @@ class BasicLayer3D(nn.Module):
             )
             for i in range(depth)])
         
-        self.downsample = downsample
         if self.downsample is not None:
             self.downsample = downsample(dim=dim, norm_layer=norm_layer,isotropy=isotropy)
 
@@ -647,19 +647,37 @@ class BasicLayer3D(nn.Module):
             x: Input feature, tensor size (B, C, D, H, W).
         """
         # calculate attention mask for SW-MSA
-        B, C, D, H, W = x.shape
-        window_size, shift_size = get_window_size_3d((D,H,W), self.window_size, self.shift_size)
-        x = rearrange(x, 'b c d h w -> b d h w c')
-        Dp = int(np.ceil(D / window_size[0])) * window_size[0]
-        Hp = int(np.ceil(H / window_size[1])) * window_size[1]
-        Wp = int(np.ceil(W / window_size[2])) * window_size[2]
-        attn_mask = compute_mask(Dp, Hp, Wp, window_size, shift_size, x.device)
-        for blk in self.blocks:
-            x = blk(x, attn_mask)
-        x = x.view(B, D, H, W, -1)
+        if self.downsample_before:
+            B, C, D, H, W = x.shape
+            x = rearrange(x, 'b c d h w -> b d h w c')
+            if self.downsample is not None:
+                x = self.downsample(x)
+            B, D, H, W, C = x.shape
 
-        if self.downsample is not None:
-            x = self.downsample(x)
+            window_size, shift_size = get_window_size_3d((D,H,W), self.window_size, self.shift_size)
+            # x = rearrange(x, 'b c d h w -> b d h w c')
+            Dp = int(np.ceil(D / window_size[0])) * window_size[0]
+            Hp = int(np.ceil(H / window_size[1])) * window_size[1]
+            Wp = int(np.ceil(W / window_size[2])) * window_size[2]
+            attn_mask = compute_mask(Dp, Hp, Wp, window_size, shift_size, x.device)
+            for blk in self.blocks:
+                x = blk(x, attn_mask)
+            x = x.view(B, D, H, W, -1)
+        
+        else:
+            B, C, D, H, W = x.shape
+            window_size, shift_size = get_window_size_3d((D,H,W), self.window_size, self.shift_size)
+            x = rearrange(x, 'b c d h w -> b d h w c')
+            Dp = int(np.ceil(D / window_size[0])) * window_size[0]
+            Hp = int(np.ceil(H / window_size[1])) * window_size[1]
+            Wp = int(np.ceil(W / window_size[2])) * window_size[2]
+            attn_mask = compute_mask(Dp, Hp, Wp, window_size, shift_size, x.device)
+            for blk in self.blocks:
+                x = blk(x, attn_mask)
+            x = x.view(B, D, H, W, -1)
+            if self.downsample is not None:
+                x = self.downsample(x)
+
         x = rearrange(x, 'b d h w c -> b c d h w')
         return x
 
@@ -875,8 +893,8 @@ class SwinTransformer3D(nn.Module):
                  patch_size=(4,4,4),
                  in_channel=3,
                  embed_dim=96,
-                 depths=[2, 2, 2, 2, 2],
-                 num_heads=[3, 6, 12, 18, 24],
+                 depths=[2, 2, 2, 2],
+                 num_heads=[3, 6, 12, 24],
                  window_size=(2,7,7),
                  mlp_ratio=4.,
                  qkv_bias=True,
@@ -888,7 +906,9 @@ class SwinTransformer3D(nn.Module):
                  patch_norm=False,
                  frozen_stages=-1,
                  use_checkpoint=False,
-                 isotropy = [False,False,False,False,False],
+                 swin_isotropy = [False,False,False,False],
+                 use_conv = False,
+                 downsample_before = [True,True,True,True],
                  **kwargs):
         super().__init__()
 
@@ -900,25 +920,27 @@ class SwinTransformer3D(nn.Module):
         self.frozen_stages = frozen_stages
         self.window_size = window_size
         self.patch_size = patch_size
-        self.isotropy = isotropy
+        self.isotropy = swin_isotropy
         assert len(self.isotropy) == self.num_layers
         assert len(num_heads) == self.num_layers
-        assert self.num_layers == 5
-        # split image into non-overlapping patches
-        self.patch_embed = PatchEmbed3D(
-            patch_size=patch_size, in_channel=in_channel, embed_dim=embed_dim,
-            norm_layer=norm_layer if self.patch_norm else None)
-
-        self.pos_drop = nn.Dropout(p=drop_rate)
+        assert len(downsample_before) == self.num_layers
+        self.use_conv = use_conv
+        if self.use_conv:
+            assert self.num_layers == 3
+        else:
+            assert self.num_layers == 4
+        
 
         # stochastic depth
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule
-
+        dims = [embed_dim]
+        for _ in range(self.num_layers-1):
+            dims.append(embed_dim * 2**_)
         # build layers
         layers = nn.ModuleList()
         for i_layer in range(self.num_layers):
             layer = BasicLayer3D(
-                dim=int(embed_dim * 2**i_layer),
+                dim=dims[i_layer],
                 depth=depths[i_layer],
                 num_heads=num_heads[i_layer],
                 window_size=window_size,
@@ -929,16 +951,56 @@ class SwinTransformer3D(nn.Module):
                 attn_drop=attn_drop_rate,
                 drop_path=dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
                 norm_layer=norm_layer,
-                downsample=PatchMerging3D if i_layer<self.num_layers-1 else None,
-                isotropy=isotropy[i_layer],
+                downsample_before = downsample_before[i_layer],
+                downsample=PatchMerging3D if i_layer>0 else None,
+                isotropy=self.isotropy[i_layer],
                 use_checkpoint=use_checkpoint)
             layers.append(layer)
 
-        self.layer0 = layers[0]
-        self.layer1 = layers[1]
-        self.layer2 = layers[2]
-        self.layer3 = layers[3]
-        self.layer4 = layers[4]
+        # split image into non-overlapping patches
+            patch_embed = PatchEmbed3D(
+                patch_size=patch_size, in_channel=in_channel, embed_dim=embed_dim,
+                norm_layer=norm_layer if self.patch_norm else None)
+
+            pos_drop = nn.Dropout(p=drop_rate)
+
+        if self.use_conv:
+            # self.layer0 = nn.Sequential(nn.Conv3d(in_channels = in_channel,out_channels = in_channel,kernel_size = 3,stride = 1,padding = 1,padding_mode = 'replicate'),
+            #                             nn.Conv3d(in_channels = in_channel,out_channels = in_channel,kernel_size = 3,stride = 1,padding = 1,padding_mode = 'replicate'),
+            #                             nn.Conv3d(in_channels = in_channel,out_channels = in_channel,kernel_size = 3,stride = 1,padding = 1,padding_mode = 'replicate'),
+            #                             ) #ORIGINAL DIMENSIONS
+            # self.layer1 = nn.Sequential(patch_embed,pos_drop,)
+            # self.layer2 = layers[0]
+            # self.layer3 = layers[1]
+            # self.layer4 = nn.Sequential(layers[2])
+
+
+            # self.layer0 = nn.Sequential(nn.Conv3d(in_channels = in_channel,out_channels = in_channel,kernel_size = 3,stride = 1,padding = 1,padding_mode = 'replicate'),
+            #                             nn.Conv3d(in_channels = in_channel,out_channels = in_channel,kernel_size = 3,stride = 1,padding = 1,padding_mode = 'replicate'),
+            #                             nn.Conv3d(in_channels = in_channel,out_channels = in_channel,kernel_size = 3,stride = 1,padding = 1,padding_mode = 'replicate'),
+            #                             patch_embed,pos_drop,)
+            # self.layer1 = layers[0]
+            # self.layer2 = layers[1]
+            # self.layer3 = layers[2]
+            # self.layer4 = layers[3]
+
+            self.layer0 = nn.Sequential(nn.Conv3d(in_channels = in_channel,out_channels = in_channel,kernel_size = 3,stride = 1,padding = 1,padding_mode = 'replicate'),
+                                        nn.Conv3d(in_channels = in_channel,out_channels = in_channel,kernel_size = 3,stride = 1,padding = 1,padding_mode = 'replicate'),
+                                        nn.Conv3d(in_channels = in_channel,out_channels = in_channel,kernel_size = 3,stride = 1,padding = 1,padding_mode = 'replicate'),
+                                        )
+            self.layer1 = nn.Sequential(patch_embed,pos_drop)
+            self.layer2 = layers[0]
+            self.layer3 = layers[1]
+            self.layer4 = layers[2]
+
+
+        else:
+            
+            self.layer0 = nn.Sequential(patch_embed,pos_drop)
+            self.layer1 = layers[0]
+            self.layer2 = layers[1]
+            self.layer3 = layers[2]
+            self.layer4 = layers[3]
 
         self.num_features = int(embed_dim * 2**(self.num_layers-1))
 
@@ -1047,20 +1109,34 @@ class SwinTransformer3D(nn.Module):
 
     def forward(self, x):
         """Forward function."""
-        x = self.patch_embed(x)
+        if self.use_conv:
+            x = self.layer0(x.contiguous())
 
-        x = self.pos_drop(x)
+            x = self.patch_embed(x)
+
+            x = self.pos_drop(x)
+            
+            x = self.layer1(x.contiguous())
+
+            x = self.layer2(x.contiguous())
+
+            x = self.layer3(x.contiguous())
+
+            x = self.layer4(x.contiguous())
+        else:
+            x = self.patch_embed(x)
+
+            x = self.pos_drop(x)
         
-        x = self.layer0(x.contiguous())
+            x = self.layer0(x.contiguous())
+            
+            x = self.layer1(x.contiguous())
 
-        x = self.layer1(x.contiguous())
+            x = self.layer2(x.contiguous())
 
-        x = self.layer2(x.contiguous())
+            x = self.layer3(x.contiguous())
 
-        x = self.layer3(x.contiguous())
-
-        x = self.layer4(x.contiguous())
-
+            x = self.layer4(x.contiguous())
 
         x = rearrange(x, 'n c d h w -> n d h w c')
 

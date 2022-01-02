@@ -155,13 +155,39 @@ class TestModelBlock(unittest.TestCase):
         y1 = model(x)
         self.assertTupleEqual(tuple(y1.shape), (2, 1, d, h, w))
 
-    def test_build_fpn_with_swintransformer(self):
+    def test_build_fpn_with_default_swintransformer(self):
         r"""Test building a 3D FPN model with BotNet3D backbone from configs.
         """
         cfg = get_cfg_defaults()
         cfg.MODEL.ARCHITECTURE = 'fpn_3d'
         cfg.MODEL.BACKBONE = 'swintransformer3d'
-        cfg.MODEL.FILTERS = [192, 384, 768, 1536, 1536]
+        cfg.MODEL.FILTERS = [96, 96, 192, 384, 768]
+        cfg.MODEL.SWIN_ISOTROPY = [False,False,False,False]
+        cfg.MODEL.DEPTHS = [2,2,2,2]
+        cfg.MODEL.NUM_HEADS = [3,6,12,24]
+        cfg.MODEL.USE_CONV = False
+        cfg.MODEL.DOWNSAMPLE_BEFORE = [True,True,True,True]
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = build_model(cfg, device).eval()
+
+        d, h, w = cfg.MODEL.INPUT_SIZE
+        c = cfg.MODEL.IN_PLANES
+        x = torch.rand(2, c, d, h, w)
+        y1 = model(x)
+        self.assertTupleEqual(tuple(y1.shape), (2, c, d, h, w))
+    
+    def test_build_fpn_with_conv_swintransformer(self):
+        r"""Test building a 3D FPN model with BotNet3D backbone from configs.
+        """
+        cfg = get_cfg_defaults()
+        cfg.MODEL.ARCHITECTURE = 'fpn_3d'
+        cfg.MODEL.BACKBONE = 'swintransformer3d'
+        cfg.MODEL.FILTERS = [1, 96, 96, 192, 384]
+        cfg.MODEL.SWIN_ISOTROPY = [False,False,False]
+        cfg.MODEL.DEPTHS = [2,2,2]
+        cfg.MODEL.NUM_HEADS = [3,6,12]
+        cfg.MODEL.USE_CONV = True
+        cfg.MODEL.DOWNSAMPLE_BEFORE = [True,True,True]
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = build_model(cfg, device).eval()
 

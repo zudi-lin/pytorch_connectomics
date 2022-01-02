@@ -57,7 +57,9 @@ def build_model(cfg, device, rank=None):
             'patch_norm': cfg.MODEL.PATCH_NORM,
             'frozen_stages': cfg.MODEL.FROZEN_STAGES,
             'use_checkpoint': cfg.MODEL.USE_CHECKPOINT,
-            'isotropy': cfg.MODEL.ISOTROPY,         
+            'swin_isotropy': cfg.MODEL.SWIN_ISOTROPY,
+            'use_conv': cfg.MODEL.USE_CONV,
+            'downsample_before': cfg.MODEL.DOWNSAMPLE_BEFORE,     
             }
             kwargs.update(swin_kwargs)
 

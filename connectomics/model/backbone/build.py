@@ -32,7 +32,10 @@ def build_backbone(backbone_type: str,
 
     backbone = backbone_dict[backbone_type](**kwargs)
     if backbone_type[:15] =='swintransformer':
-        assert len(feat_keys) == backbone.num_layers
+        if backbone.use_conv:
+            assert len(feat_keys) == backbone.num_layers + 2
+        else:
+            assert len(feat_keys) == backbone.num_layers + 1
     else:
         assert len(feat_keys) == backbone.num_stages
     return IntermediateLayerGetter(backbone, return_layers)
