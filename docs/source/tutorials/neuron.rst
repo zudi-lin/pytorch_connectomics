@@ -167,11 +167,11 @@ Follow the instructions on the repo to install the ``waterz`` package. We will u
     affinities = ... # model prediction
 
     affinities = affinities/255 
-    # The affinity values of in the model prediction is in the interval [0,255] and the affinity thresholds provided constraint them 
+    # The affinity values in the model prediction are in the interval [0,255] and the affinity thresholds provided constraint them 
     # in the interval [0.05,0.995] hence we divide it by 255 in order to scale it.
 
     # evaluation: vi/rand
-    seg_gt = None #segmentation ground truth
+    seg_gt = None #segmentation ground truth. If available, the prediction is evaluated against this ground truth and ``Rand`` and ``VI`` scores are produced.
 
     aff_thresholds = [0.005, 0.995]
     seg_thresholds = [0.1, 0.3, 0.6]
