@@ -171,7 +171,7 @@ Follow the instructions on the repo to install the ``waterz`` package. We will u
     # in the interval [0.05,0.995] hence we divide it by 255 in order to scale it.
 
     # evaluation: vi/rand
-    seg_gt = None #segmentation ground truth. If available, the prediction is evaluated against this ground truth and ``Rand`` and ``VI`` scores are produced.
+    seg_gt = None #segmentation ground truth. If available, the prediction is evaluated against this ground truth and Rand and VI scores are produced.
 
     aff_thresholds = [0.05, 0.995]
     seg_thresholds = [0.1, 0.3, 0.6]
