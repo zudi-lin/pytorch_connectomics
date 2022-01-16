@@ -158,6 +158,30 @@ Follow the instructions on the repo to install the ``waterz`` package. We will u
 - ``affinity_threshold`` These are the values in the affinity maps will be constrained to lie between these thresholds. Recommended values are ``[0.05,0.995]``
 - ``gt`` This is the ground truth for the predicted affinity maps. This will be used to evaluate the segmentation result. If ground truth is not available, this parameter is supposed to be ``None``.If the ground truth is available, the API prints the ``Rand`` and ``VI`` score. 
 
+.. code-block:: none
+
+    import waterz
+    import numpy as np
+
+    # affinities is a [3,depth,height,width] numpy array of float32
+    affinities = ... # model prediction
+
+    affinities = affinities/255 
+    # The affinity values of in the model prediction is in the interval [0,255] and the affinity thresholds provided constraint them 
+    # in the interval [0.05,0.995] hence we divide it by 255 in order to scale it.
+
+    # evaluation: vi/rand
+    seg_gt = None #segmentation ground truth
+
+    aff_thresholds = [0.005, 0.995]
+    seg_thresholds = [0.1, 0.3, 0.6]
+    
+    seg = waterz.waterz(affinities, seg_thresholds, merge_function='aff50_his256',                                
+              aff_threshold=aff_thresholds, gt=seg_gt)
+
+    # seg will be an array of shape [3,depth,height,width]. Since there are 3 segmentation thresholds, we get a result of shape 
+    # [depth,height,width] for each threshold.
+ 
 Download the ``zwatershed`` package (optional):
 
 .. code-block:: none
@@ -171,4 +195,4 @@ Generate 3D segmentation and report Rand and VI score using ``waterz``. Please s
 Long-range affinity learning
 -------------------------------
 
-Tonh0_his256 h 
+Tonh0_his256 h le
