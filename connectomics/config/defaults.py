@@ -10,7 +10,7 @@ _C = CN()
 # -----------------------------------------------------------------------------
 _C.SYSTEM = CN()
 
-_C.SYSTEM.NUM_GPUS = 4
+_C.SYSTEM.NUM_GPUS = 1
 _C.SYSTEM.NUM_CPUS = 4
 # Run distributed training using DistributedDataparallel model
 _C.SYSTEM.DISTRIBUTED = False
@@ -108,6 +108,27 @@ _C.MODEL.PRE_MODEL_ITER = 0
 
 # Predict an auxiliary output (only works with 2D DeeplabV3)
 _C.MODEL.AUX_OUT = False
+
+## EXCLUSIVE TO SWINTRANSFORMERS
+
+_C.MODEL.PATCH_SIZE = (4,4,4)
+_C.MODEL.DEPTHS = [2,2,2,2,2]
+_C.MODEL.NUM_HEADS = [3,6,12,24,24]
+_C.MODEL.WINDOW_SIIE = (2,7,7)
+_C.MODEL.MLP_RATIO = 4.
+_C.MODEL.QKV_BIAS = True
+_C.MODEL.QK_SCALE = None
+_C.MODEL.DROP_RATE = 0.
+_C.MODEL.ATTN_DROP_RATE = 0.
+_C.MODEL.DROP_PATH_RATE = 0.2
+_C.MODEL.USE_CONV = False
+_C.MODEL.PATCH_NORM = False
+_C.MODEL.FROZEN_STAGES = -1
+_C.MODEL.USE_CHECKPOINT = False
+_C.MODEL.EMBED_DIM = 96
+_C.MODEL.DOWNSAMPLE_BEFORE = [True, True, True, True]
+_C.MODEL.SWIN_ISOTROPY = [True, True, True, True]
+
 
 # -----------------------------------------------------------------------------
 # Dataset

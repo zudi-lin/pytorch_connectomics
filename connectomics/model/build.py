@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 from .arch import UNet3D, UNet2D, FPN3D, DeepLabV3, UNetPlus3D
-from .backbone import RepVGG3D
+from .backbone import RepVGG3D, SwinTransformer2D, SwinTransformer3D
 
 MODEL_MAP = {
     'unet_3d': UNet3D,
@@ -41,6 +41,27 @@ def build_model(cfg, device, rank=None):
         kwargs['deploy'] = cfg.MODEL.DEPLOY_MODE
         if cfg.MODEL.BACKBONE == 'botnet':
             kwargs['fmap_size'] = cfg.MODEL.INPUT_SIZE
+        if cfg.MODEL.BACKBONE == 'swintransformer3d':
+            swin_kwargs = {
+            'patch_size': cfg.MODEL.PATCH_SIZE,
+            'depths': cfg.MODEL.DEPTHS,
+            'num_heads': cfg.MODEL.NUM_HEADS,
+            'window_size': cfg.MODEL.WINDOW_SIIE,
+            'mlp_ratio': cfg.MODEL.MLP_RATIO,
+            'qkv_bias': cfg.MODEL.QKV_BIAS,
+            'qk_scale': cfg.MODEL.QK_SCALE,
+            'drop_rate': cfg.MODEL.DROP_RATE,
+            'attn_drop_rate': cfg.MODEL.ATTN_DROP_RATE,
+            'drop_path_rate': cfg.MODEL.DROP_PATH_RATE,
+            'embed_dim': cfg.MODEL.EMBED_DIM,
+            'patch_norm': cfg.MODEL.PATCH_NORM,
+            'frozen_stages': cfg.MODEL.FROZEN_STAGES,
+            'use_checkpoint': cfg.MODEL.USE_CHECKPOINT,
+            'swin_isotropy': cfg.MODEL.SWIN_ISOTROPY,
+            'use_conv': cfg.MODEL.USE_CONV,
+            'downsample_before': cfg.MODEL.DOWNSAMPLE_BEFORE,     
+            }
+            kwargs.update(swin_kwargs)
 
     if model_arch[:7] == 'deeplab':
         kwargs['name'] = model_arch

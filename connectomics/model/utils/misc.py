@@ -6,7 +6,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from torch.jit.annotations import Dict
-
+from einops import rearrange
 
 class IntermediateLayerGetter(nn.ModuleDict):
     """
@@ -256,7 +256,7 @@ def get_norm_3d(norm: str, out_channels: int, bn_momentum: float = 0.1) -> nn.Mo
     Returns:
         nn.Module: the normalization layer
     """
-    assert norm in ["bn", "sync_bn", "gn", "in", "none"], \
+    assert norm in ["bn", "sync_bn", "gn", "in", "none","layer"], \
         "Get unknown normalization layer key {}".format(norm)
     if norm == "gn": assert out_channels%8 == 0, "GN requires channels to separable into 8 groups"
     norm = {
@@ -265,6 +265,7 @@ def get_norm_3d(norm: str, out_channels: int, bn_momentum: float = 0.1) -> nn.Mo
         "in": nn.InstanceNorm3d,
         "gn": lambda channels: nn.GroupNorm(8, channels),
         "none": nn.Identity,
+        "layer": nn.LayerNorm,
     }[norm]
     if norm in ["bn", "sync_bn", "in"]:
         return norm(out_channels, momentum=bn_momentum)
@@ -282,7 +283,7 @@ def get_norm_2d(norm: str, out_channels: int, bn_momentum: float = 0.1) -> nn.Mo
     Returns:
         nn.Module: the normalization layer
     """
-    assert norm in ["bn", "sync_bn", "gn", "in", "none"], \
+    assert norm in ["bn", "sync_bn", "gn", "in", "none","layer"], \
         "Get unknown normalization layer key {}".format(norm)
     norm = {
         "bn": nn.BatchNorm2d,
@@ -290,6 +291,7 @@ def get_norm_2d(norm: str, out_channels: int, bn_momentum: float = 0.1) -> nn.Mo
         "in": nn.InstanceNorm2d,
         "gn": lambda channels: nn.GroupNorm(16, channels),
         "none": nn.Identity,
+        "layer": nn.LayerNorm,
     }[norm]
     if norm in ["bn", "sync_bn", "in"]:
         return norm(out_channels, momentum=bn_momentum)
@@ -325,3 +327,18 @@ def get_norm_1d(norm: str, out_channels: int, bn_momentum: float = 0.1) -> nn.Mo
 def get_num_params(model):
     num_param = sum([param.nelement() for param in model.parameters()])
     return num_param
+
+# ----------------------
+# Miscellanous Modules
+# ----------------------
+
+class Rearrange(nn.Module):
+    def __init__(self,before_norm=True):
+        super(Rearrange, self).__init__()
+        self.before_norm = before_norm
+
+    def forward(self, x):
+        if self.before_norm:
+            return rearrange(x, 'n c d h w -> n d h w c')
+        else:
+            return rearrange(x, 'n d h w c -> n c d h w')   
