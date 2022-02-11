@@ -27,7 +27,7 @@ def getSegType(mid):
 
 def relabel(seg, do_type=False):
     # get the unique labels
-    uid = np.unique(seg)
+    uid = np.unique(seg).astype(np.int64)
     # ignore all-background samples
     if len(uid) == 1 and uid[0] == 0:
         return seg
@@ -41,7 +41,7 @@ def relabel(seg, do_type=False):
         m_type = getSegType(mid)
     mapping = np.zeros(mid, dtype=m_type)
     mapping[uid] = np.arange(1, len(uid) + 1, dtype=m_type)
-    return mapping[seg]
+    return mapping[seg.astype(np.int64)]
 
 
 def remove_small(seg, thres=100):
