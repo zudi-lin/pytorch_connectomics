@@ -177,7 +177,7 @@ inference:
   data:
     test_image: datasets/hydra-bv/vol*_im.h5
     test_label: datasets/hydra-bv/vol*_vesicle_ins.h5
-    test_mask: datasets/hydra-bv/vol*_mask.h5
+    test_mask: datasets/hydra-bv/vol*_mask.h5    
     test_resolution: [30, 8, 8]
     output_path: outputs/hydra_bv_monai_unet/results/
 
