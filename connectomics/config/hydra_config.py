@@ -520,6 +520,7 @@ class CheckpointConfig:
     save_every_n_epochs: int = 10
     checkpoint_filename: Optional[str] = None  # Auto-generated from monitor if None
     use_timestamp: bool = True  # Create timestamped subdirectories (YYYYMMDD_HHMMSS)
+    dirpath: str = "checkpoints/"  # Directory path for saving checkpoints
 
 
 @dataclass

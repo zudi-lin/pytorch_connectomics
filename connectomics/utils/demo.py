@@ -80,11 +80,13 @@ def create_demo_config():
     from connectomics.config import Config
     from connectomics.config.hydra_config import (
         SystemConfig,
-        TrainingSystemConfig,
-        InferenceSystemConfig,
+        SystemTrainingConfig,
+        SystemInferenceConfig,
         ModelConfig,
         DataConfig,
         OptimizationConfig,
+        OptimizerConfig,
+        SchedulerConfig,
         MonitorConfig,
         CheckpointConfig,
         EarlyStoppingConfig,
@@ -97,13 +99,13 @@ def create_demo_config():
     cfg = Config(
         system=SystemConfig(
             seed=42,
-            training=TrainingSystemConfig(
+            training=SystemTrainingConfig(
                 num_gpus=1 if torch.cuda.is_available() else 0,
                 num_cpus=2,
                 batch_size=2,
                 num_workers=0,  # 0 for demo to avoid multiprocessing issues
             ),
-            inference=InferenceSystemConfig(
+            inference=SystemInferenceConfig(
                 num_gpus=1 if torch.cuda.is_available() else 0,
                 num_cpus=2,
                 batch_size=2,
@@ -113,7 +115,7 @@ def create_demo_config():
         model=ModelConfig(
             architecture="monai_basic_unet3d",
             in_channels=1,
-            out_channels=2,
+            out_channels=1,  # Binary segmentation (single output channel)
             spatial_dims=3,
             filters=[16, 32, 64, 128],  # Smaller for demo
             dropout=0.1,
@@ -142,12 +144,12 @@ def create_demo_config():
             log_every_n_steps=1,
             deterministic=False,
             benchmark=True,
+            optimizer=OptimizerConfig(name="AdamW", lr=1e-3, weight_decay=1e-4),
+            scheduler=SchedulerConfig(name="ConstantLR", warmup_epochs=0),
         ),
-        optimizer={"name": "AdamW", "lr": 1e-3, "weight_decay": 1e-4},
-        scheduler={"name": "ConstantLR", "warmup_epochs": 0},
         monitor=MonitorConfig(
             checkpoint=CheckpointConfig(
-                dirpath="outputs/demo/checkpoints",
+                dirpath="outputs/demo/checkpoints/",
                 checkpoint_filename="demo-{epoch:02d}-{step:06d}",
                 monitor="train_loss_total_epoch",
                 mode="min",
@@ -180,7 +182,7 @@ def create_demo_config():
             data=InferenceDataConfig(
                 test_image=None,
                 test_label=None,
-                output_path="outputs/demo/predictions",
+                output_name="demo_predictions.h5",
             ),
         ),
     )
