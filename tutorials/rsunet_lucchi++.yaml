@@ -134,7 +134,7 @@ optimization:
 
   optimizer:
     name: Adam                         # Standard Adam (not AdamW for EM tasks)
-    lr: 0.0001                         # Conservative LR (1e-4 is standard for EM)
+    lr: 0.001                         # Conservative LR (1e-4 is standard for EM)
     weight_decay: 0.0                  # No weight decay (not beneficial for EM)
     betas: [0.9, 0.999]                # Standard Adam betas
     eps: 1.0e-8                        # Numerical stability
@@ -219,11 +219,6 @@ inference:
 
   # Postprocessing configuration (applied AFTER TTA if enabled)
   postprocessing:
-    binary:
-      enabled: true
-      threshold_range: [0.5, 1.0]
-      opening_iterations: 2      
-
     intensity_scale: 255                    # Scale predictions to [0, 255] for saving
     intensity_dtype: uint8                  # Save as uint8
 

@@ -215,7 +215,6 @@ inference:
     # Binary segmentation refinement (applied after binary_thresholding decoding)
     binary:
       enabled: true                      # Enable binary postprocessing
-      threshold_range: [0.5, 1.0]        # Not used (already thresholded by decoding)
       opening_iterations: 2              # Morphological opening (erosion + dilation) to remove small noise
       connected_components:
         enabled: true                    # Enable connected components filtering
