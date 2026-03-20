@@ -1,8 +1,8 @@
-experiment_name: rsunet_snemi_lee2017_modern_sdt
-description: SNEMI3D neuron affinity + SDT learning (9-channel affinity + 1-channel SDT)
+experiment_name: mednext_snemi_sdt
+description: SNEMI3D neuron affinity + SDT learning (MedNeXt-S, 9-channel affinity + 1-channel SDT)
 
 _base_:
-  - ../configs/all_profiles.yaml
+  - ../connectomics/config/all_profiles.yaml
 
 default:
   pipeline_profile: aff9_sdt
@@ -10,9 +10,9 @@ default:
     profile: all-gpu-cpu
   model:
     arch:
-      profile: rsunet
-    input_size: [16, 224, 224]
-    output_size: [16, 224, 224]
+      profile: mednext_s
+    input_size: [32, 160, 160]
+    output_size: [32, 160, 160]
   data:
     label_transform:
       resolution: [30, 6, 6]
@@ -30,15 +30,15 @@ default:
 
     dataloader:
       profile: cached
-      patch_size: [16, 224, 224]
+      patch_size: [32, 160, 160]
     data_transform:
       # Keep symmetric full-volume context padding on the inference input.
-      pad_size: [17, 128, 128]
+      pad_size: [16, 80, 80]
     augmentation:
       profile: aug_em_neuron
   inference:
     sliding_window:
-      window_size: [16, 224, 224]
+      window_size: [32, 160, 160]
       sw_batch_size: 1
       keep_input_on_cpu: false
     test_time_augmentation:
@@ -50,9 +50,8 @@ default:
         #select_channel: [0, 1, 2, 9]
     postprocessing:
       enabled: true
-      # crop_pad + affinity_crop[(17,0),(17,0),(17,0)] = pad_size [17,128,128]:
-      #   Z: 0+17=17, 17+0=17 | Y/X: 111+17=128, 128+0=128
-      crop_pad: [0, 17, 111, 128, 111, 128]
+      # crop_pad + affinity_crop[(9,0),(9,0),(9,0)] = pad_size [16,80,80]
+      crop_pad: [7, 16, 71, 80, 71, 80]
     save_prediction:
       enabled: true
     evaluation:
