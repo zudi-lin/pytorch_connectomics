@@ -188,8 +188,8 @@ def write_pyramid(dest: Path, plane_iter, shape_zyx, spacing_zyx, attrs: dict,
 
 
 def provenance_attrs(*, source: str, source_channel: int, source_shape_zyx,
-                     spacing_nm_zyx, clip_mode: str, clip_values, clip_limit: float,
-                     spacing_basis: str = "biological") -> dict:
+                     spacing_nm_zyx, clip_mode: str, clip_values, clip_limit: float | None,
+                     spacing_basis: str = "biological", mapping: dict | None = None) -> dict:
     """The non-OME half of `.zattrs`, keyed exactly as preprocess_liconn writes it.
 
     SPACING BASIS. Every published moe group records *biological* spacing:
@@ -203,6 +203,10 @@ def provenance_attrs(*, source: str, source_channel: int, source_shape_zyx,
     `spacing_basis` and overlays these on an expid96/99/107/108 layer will be
     wrong by the expansion fold, which is why the warning is in the metadata and
     not only in a log.
+
+    INTENSITY. `clip_mode='gat'` records the volume's Anscombe mapping under
+    the keys `scripts/preprocess_liconn.py --intensity-mode gat` writes, in place
+    of the clip/CLAHE keys; the legacy modes keep the published key set.
     """
     attrs = {
         "axes": "ZYX",
@@ -214,14 +218,27 @@ def provenance_attrs(*, source: str, source_channel: int, source_shape_zyx,
         "downsample_rounding": "nearest_even",
         "input_spacing_nm_zyx": [float(v) for v in spacing_nm_zyx],
         "spacing_nm_zyx": [float(v) for v in spacing_nm_zyx],
-        "clahe_clip_limit": float(clip_limit),
     }
-    if clip_mode == "percentile":
-        attrs["clip_mode"] = "percentile"
-        attrs["clip_percentiles"] = [float(v) for v in clip_values]
-    elif clip_mode == "fixed_intensity":
-        attrs["clip_mode"] = "fixed_intensity"
-        attrs["clip_intensity_range"] = [float(v) for v in clip_values]
+    if clip_mode == "gat":
+        if mapping is None:
+            raise ValueError("clip_mode 'gat' needs its mapping recorded")
+        low, high = (float(v) for v in mapping["stretch_range"])
+        attrs.update({
+            "intensity_mode": "gat",
+            "noise_model": "variance = gain * (x - offset)",
+            "noise_gain": float(mapping["gain"]),
+            "noise_offset": float(mapping["offset"]),
+            "noise_model_source": mapping["noise_model_source"],
+            "stats_z_indices": [int(v) for v in mapping["stats_z_indices"]],
+            "stretch_percentiles": [float(v) for v in mapping["stretch_percentiles"]],
+            "stretch_range_anscombe": [low, high],
+            "noise_sigma_uint8_levels": 255.0 / (high - low),
+        })
+    elif clip_mode in ("percentile", "fixed_intensity"):
+        attrs["clahe_clip_limit"] = "none" if clip_limit is None else float(clip_limit)
+        attrs["clip_mode"] = clip_mode
+        key = "clip_percentiles" if clip_mode == "percentile" else "clip_intensity_range"
+        attrs[key] = [float(v) for v in clip_values]
     else:
         raise ValueError(f"unknown clip_mode {clip_mode!r}")
 

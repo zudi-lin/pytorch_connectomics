@@ -92,3 +92,45 @@ def test_flat_plane_returns_zeros_not_an_error():
     out = pre.preprocess_xy_plane(np.full((8, 8), 7.0, dtype=np.float32),
                                   clip_intensity_range=None, clip_limit=0.03)
     assert out.dtype == np.uint8 and not out.any()
+
+
+def _shot_noise_volume(seed=0, gain=6.0, offset=140.0, shape=(4, 256, 256)):
+    rng = np.random.default_rng(seed)
+    z, y, x = np.meshgrid(*(np.arange(n) for n in shape), indexing="ij")
+    photons = 5.0 + 60.0 * (0.5 + 0.5 * np.sin(y / 17.0) * np.cos(x / 23.0 + z))
+    return (gain * rng.poisson(photons) + offset).astype(np.uint16)
+
+
+def test_anscombe_module_loads_without_connectomics():
+    """The gat pixel math must be the repo's module, loaded by path."""
+    ans = ns.load_anscombe_module()
+    assert "connectomics" not in ans.__name__
+    for name in ("fit_anscombe_mapping", "anscombe_to_uint8", "estimate_noise_model"):
+        assert hasattr(ans, name)
+
+
+def test_gat_mapper_is_one_volume_function_regardless_of_plane_order():
+    """Streaming is only equivalent to a whole-volume pass if a plane's output
+    depends on the plane and the volume mapping, never on neighbouring planes."""
+    ans = ns.load_anscombe_module()
+    volume = _shot_noise_volume()
+    mapping = ns.anscombe_mapping_json(ans.fit_anscombe_mapping(
+        volume, stats_planes=4, stretch_percentiles=(1.0, 99.9)))
+    to_uint8 = ns.plane_mapper("gat", (1.0, 99.9), None, mapping)
+    forward = [to_uint8(p) for p in volume]
+    backward = [to_uint8(p) for p in volume[::-1]][::-1]
+    for a, b in zip(forward, backward):
+        assert a.dtype == np.uint8 and np.array_equal(a, b)
+    stacked = np.stack(forward)
+    assert stacked.min() == 0 and stacked.max() == 255
+
+
+def test_gat_mapper_refuses_clahe_and_a_missing_mapping():
+    for kwargs in ({"clip_limit": 0.03, "mapping": {"gain": 1.0}},
+                   {"clip_limit": None, "mapping": None}):
+        try:
+            ns.plane_mapper("gat", (1.0, 99.9), **kwargs)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"expected ValueError for {kwargs}")

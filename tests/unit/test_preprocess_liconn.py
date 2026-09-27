@@ -23,7 +23,9 @@ def test_preprocess_xy_plane_uses_requested_percentiles(monkeypatch):
         return image
 
     monkeypatch.setattr(preprocess_liconn.exposure, "equalize_adapthist", fake_clahe)
-    output = preprocess_liconn.preprocess_xy_plane(plane, clip_intensity_range=None)
+    output = preprocess_liconn.preprocess_xy_plane(
+        plane, clip_intensity_range=None, clip_limit=0.03
+    )
 
     low, high = np.percentile(plane.astype(np.float32), (1.0, 99.0))
     expected = np.clip((plane.astype(np.float32) - low) / (high - low), 0.0, 1.0)
@@ -45,11 +47,25 @@ def test_preprocess_xy_plane_uses_fixed_intensity_range(monkeypatch):
     output = preprocess_liconn.preprocess_xy_plane(
         plane,
         clip_intensity_range=(120.0, 350.0),
+        clip_limit=0.03,
     )
 
     expected = np.clip((plane.astype(np.float32) - 120.0) / 230.0, 0.0, 1.0)
     np.testing.assert_allclose(captured["image"], expected)
     assert captured["clip_limit"] == 0.03
+    np.testing.assert_array_equal(output, np.rint(expected * 255.0).astype(np.uint8))
+
+
+def test_preprocess_xy_plane_skips_clahe_by_default(monkeypatch):
+    def fail_clahe(*_args, **_kwargs):
+        raise AssertionError("CLAHE must be opt-in")
+
+    monkeypatch.setattr(preprocess_liconn.exposure, "equalize_adapthist", fail_clahe)
+    plane = np.array([[100, 120], [235, 400]], dtype=np.uint16)
+
+    output = preprocess_liconn.preprocess_xy_plane(plane, clip_intensity_range=(120.0, 350.0))
+
+    expected = np.clip((plane.astype(np.float32) - 120.0) / 230.0, 0.0, 1.0)
     np.testing.assert_array_equal(output, np.rint(expected * 255.0).astype(np.uint8))
 
 
@@ -91,7 +107,9 @@ def test_preprocess_liconn_selects_channel_and_writes_uint8_h5(monkeypatch, tmp_
     )
     monkeypatch.setattr(preprocess_liconn, "read_volume", lambda _: raw)
 
-    result = preprocess_liconn.preprocess_liconn(input_path, output_path, channel=1)
+    result = preprocess_liconn.preprocess_liconn(
+        input_path, output_path, channel=1, intensity_mode="linear"
+    )
 
     assert result == output_path
     with h5py.File(output_path, "r") as handle:
@@ -100,6 +118,8 @@ def test_preprocess_liconn_selects_channel_and_writes_uint8_h5(monkeypatch, tmp_
         assert data.dtype == np.uint8
         assert handle["main"].attrs["axes"] == "ZYX"
         assert handle["main"].attrs["source_channel"] == 1
+        assert "intensity_mode" not in handle["main"].attrs
+        assert handle["main"].attrs["clahe_clip_limit"] == "none"
         np.testing.assert_array_equal(
             handle["main"].attrs["clip_intensity_range"], (120.0, 350.0)
         )
@@ -120,6 +140,7 @@ def test_preprocess_liconn_streams_volume_average_and_records_spacing(monkeypatc
     preprocess_liconn.preprocess_liconn(
         input_path,
         output_path,
+        intensity_mode="linear",
         downsample_factor=(2, 2, 3),
         input_spacing_nm=(12.0, 9.0, 9.0),
     )
@@ -146,3 +167,33 @@ def test_preprocess_liconn_refuses_existing_output(monkeypatch, tmp_path):
 
     with pytest.raises(FileExistsError, match="--overwrite"):
         preprocess_liconn.preprocess_liconn(input_path, output_path)
+
+
+def _shot_noise_volume(rng, gain=6.0, offset=140.0, shape=(4, 256, 256)):
+    """Poisson photons on a smooth blob pattern, scaled like a camera."""
+    z, y, x = np.meshgrid(*(np.arange(n) for n in shape), indexing="ij")
+    photons = 5.0 + 60.0 * (0.5 + 0.5 * np.sin(y / 23.0) * np.cos(x / 31.0 + z))
+    return (gain * rng.poisson(photons) + offset).astype(np.uint16)
+
+
+def test_preprocess_liconn_gat_mode_writes_full_range_and_noise_attrs(tmp_path, monkeypatch):
+    input_path = tmp_path / "input.nd2"
+    input_path.touch()
+    output_path = tmp_path / "output.h5"
+    raw = _shot_noise_volume(np.random.default_rng(0))
+    monkeypatch.setattr(preprocess_liconn, "read_volume", lambda _: raw)
+
+    preprocess_liconn.preprocess_liconn(input_path, output_path, stats_planes=4)
+
+    with h5py.File(output_path, "r") as handle:
+        data = handle["main"][:]
+        attrs = handle["main"].attrs
+        assert attrs["intensity_mode"] == "gat"
+        assert attrs["noise_model_source"] == "estimated"
+        assert abs(attrs["noise_gain"] - 6.0) < 1.0
+        assert abs(attrs["noise_offset"] - 140.0) < 15.0
+        np.testing.assert_allclose(attrs["stretch_percentiles"], (1.0, 99.9))
+    assert data.dtype == np.uint8
+    # Integer photon counts tie at the percentiles, so the tails are approximate.
+    assert 0.005 <= np.mean(data == 0) <= 0.03
+    assert 0.0 < np.mean(data == 255) <= 0.005

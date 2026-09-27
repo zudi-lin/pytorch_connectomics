@@ -29,10 +29,17 @@ both called `ExPID99_18x_2.nd2` (10.66 GB and 12.73 GB). `rclone copy` of that
 folder silently keeps one. `fetch` therefore works from file IDs, one
 `rclone copyid` per file, and records the ID in provenance.
 
-CLIP VARIANT IS REQUIRED, NOT DEFAULTED. The published set is all
-`clip_mode=percentile, clip_percentiles=[1,99]`, but `lessons/` calls fixed
-`120-350` the reference recipe; the two disagree and the choice is scientific.
-See spec.md OPEN FILL LIST. This tool will not pick for you.
+CLIP VARIANT IS REQUIRED, NOT DEFAULTED. It is the provenance label for the
+intensity recipe. The published set under `image/` is all
+`clip_mode=percentile, clip_percentiles=[1,99]` plus CLAHE.
+
+INTENSITY DEFAULT IS `gat`. One noise model and one stretch per volume
+(`connectomics/data/normalization/anscombe.py`), no CLAHE: the percentile clip
+saturated the synapse/vesicle tail and CLAHE hid defocus at the tile border.
+gat groups publish under `<expid>/image_gat/` so they can never overwrite, or be
+skipped in favour of, the legacy groups under `<expid>/image/` that
+`neuron_liconn_moe` reads. `--clip-mode percentile|fixed_intensity` reproduces
+the legacy recipe.
 """
 
 from __future__ import annotations
@@ -169,8 +176,14 @@ def published_name(stem: str, drop_slug: str | None = None, drive_id: str | None
     return "_".join(parts)
 
 
-def gcs_dest(bucket: str, prefix: str, stem: str, name: str) -> str:
-    return f"gs://{bucket}/{prefix}/{expid_group(stem)}/image/{name}.zarr"
+def image_dir(clip_mode: str) -> str:
+    """`image` holds the legacy clip+CLAHE groups; gat groups get their own folder."""
+    return "image_gat" if clip_mode == "gat" else "image"
+
+
+def gcs_dest(bucket: str, prefix: str, stem: str, name: str,
+             clip_mode: str = "percentile") -> str:
+    return f"gs://{bucket}/{prefix}/{expid_group(stem)}/{image_dir(clip_mode)}/{name}.zarr"
 
 
 # ---------------------------------------------------------------- fetch
@@ -264,8 +277,9 @@ def _docker_preprocess(a) -> None:
     argv = ["--work", str(work), "preprocess", str(nd2), "--name", name,
             "--clip-variant", a.clip_variant, "--clip-mode", a.clip_mode,
             "--clip-values", *[str(v) for v in a.clip_values],
-            "--clip-limit", str(a.clip_limit), "--channel", str(a.channel),
-            "--levels", str(a.levels)]
+            "--channel", str(a.channel), "--levels", str(a.levels)]
+    if a.clip_limit is not None:
+        argv += ["--clip-limit", str(a.clip_limit)]
     if a.fold is not None:
         argv += ["--fold", str(a.fold)]
     if a.fold_unknown:
@@ -316,6 +330,10 @@ def cmd_preprocess(a):
         naming.cube_id(parsed.stem, exposure_ms), a.drop_slug)
     work = _state(a.work, name)
     if (work / "COMPLETE.preprocess").exists() and not a.force:
+        done_mode = _prov(work).get("clip_mode", "percentile")
+        if done_mode != a.clip_mode:
+            sys.exit(f"{work} holds a clip_mode={done_mode} conversion, not {a.clip_mode}; "
+                     "use a separate --work for the other recipe, or --force to replace it")
         print(f"already preprocessed: {work}")
         return
 
@@ -341,12 +359,23 @@ def cmd_preprocess(a):
         print(f"  NOTE: fold {fold} is ASSUMED, not recorded anywhere in the data. "
               "Spacing is biological and comparable, but rests on that assumption.")
 
+    mapping = None
+    if a.clip_mode == "gat":
+        # One pass over sampled planes BEFORE streaming, so every plane gets the
+        # same pointwise mapping and the streamed result equals a whole-volume one.
+        mapping = nd2_source.fit_anscombe(src, channel=a.channel,
+                                          stretch_percentiles=a.clip_values)
+        low, high = mapping["stretch_range"]
+        print(f"  gat: variance = {mapping['gain']:.3f} * (x - {mapping['offset']:.1f}); "
+              f"transformed [{low:.2f}, {high:.2f}] -> [0, 255]; "
+              f"noise sigma = {255.0 / (high - low):.1f} uint8 levels")
     planes = nd2_source.iter_planes(src, channel=a.channel, clip_mode=a.clip_mode,
-                                    clip_values=a.clip_values, clip_limit=a.clip_limit)
+                                    clip_values=a.clip_values, clip_limit=a.clip_limit,
+                                    mapping=mapping)
     attrs = zarr_writer.provenance_attrs(
         source=str(src), source_channel=a.channel, source_shape_zyx=shape,
         spacing_nm_zyx=spacing, clip_mode=a.clip_mode, clip_values=a.clip_values,
-        clip_limit=a.clip_limit, spacing_basis=basis)
+        clip_limit=a.clip_limit, spacing_basis=basis, mapping=mapping)
     dest = work / f"{name}.zarr"
     written = zarr_writer.write_pyramid(dest, planes, shape, spacing, attrs,
                                         levels=a.levels)
@@ -380,6 +409,7 @@ def cmd_preprocess(a):
         "clip_mode": a.clip_mode,
         "clip_values": list(a.clip_values),
         "clip_limit": a.clip_limit,
+        "intensity_mapping": mapping,
         "channel": a.channel,
         "channel_name": getattr(a, "channel_name", None),
         "exposure_ms": exposure_ms,
@@ -486,7 +516,8 @@ def cmd_publish(a):
         sys.exit(f"{a.name} not preprocessed")
     src = work / f"{a.name}.zarr"
     _gzip_guard(src)
-    dest = gcs_dest(a.bucket, a.prefix, prov["stem"], a.name)
+    dest = gcs_dest(a.bucket, a.prefix, prov["stem"], a.name,
+                    prov.get("clip_mode", "percentile"))
     if a.dry_run:
         print(f"[dry-run] would rsync {src} -> {dest}")
         return
@@ -614,7 +645,7 @@ def remote_group_complete(dest: str) -> tuple:
 def cmd_check(a):
     """Audit published groups for completeness. Read-only."""
     prefix = a.target if a.target.startswith("gs://") else \
-        f"gs://{a.bucket}/{a.prefix}/{a.target}/image"
+        f"gs://{a.bucket}/{a.prefix}/{a.target}/{a.image_dir}"
     out = subprocess.run(["gcloud", "storage", "ls", prefix],
                          capture_output=True, text=True)
     groups = [ln.strip().rstrip("/") for ln in out.stdout.splitlines()
@@ -679,7 +710,7 @@ def cmd_refold(a):
         clip_mode=prov.get("clip_mode", "percentile"),
         clip_values=prov.get("clip_values", [1.0, 99.0]),
         clip_limit=prov.get("clip_limit", 0.03),
-        spacing_basis=basis)
+        spacing_basis=basis, mapping=prov.get("intensity_mapping"))
     attrs["multiscales"] = zarr_writer.ome_multiscales(shapes, spacing, f"{a.name}.zarr")
 
     old_scale = before["multiscales"][0]["datasets"][0]["coordinateTransformations"][0]["scale"]
@@ -710,7 +741,8 @@ def cmd_refold(a):
     # destination and asking the bucket is authoritative, and avoids the silent
     # half-success where the local .zattrs is relabelled and the remote is not
     # -- which in a loop over nine volumes reads exactly like nine successes.
-    dest = prov.get("published_to") or gcs_dest(a.bucket, a.prefix, prov["stem"], a.name)
+    dest = prov.get("published_to") or gcs_dest(a.bucket, a.prefix, prov["stem"], a.name,
+                                                prov.get("clip_mode", "percentile"))
     exists = subprocess.run(["gcloud", "storage", "ls", f"{dest}/.zgroup"],
                             capture_output=True, text=True)
     if exists.returncode != 0:
@@ -784,7 +816,7 @@ def cmd_run(a):
         finished -- which is precisely what happened when the gcloud token
         expired mid-run on 2026-09-21.
         """
-        dest = gcs_dest(a.bucket, a.prefix, stem, name)
+        dest = gcs_dest(a.bucket, a.prefix, stem, name, a.clip_mode)
         ok, found, expected, why = remote_group_complete(dest)
         if not ok and found:
             print(f"   {name}: INCOMPLETE in bucket ({why}) -- will re-publish")
@@ -858,15 +890,22 @@ def cmd_run(a):
 
 def _add_preprocess_args(p):
     p.add_argument("--clip-variant", default=None,
-                   help="Load-bearing provenance label, e.g. clip_percentile_1_99 "
-                        "or clip_fixed_120_350. No default on purpose; set it "
-                        "here or in data.yaml.")
-    p.add_argument("--clip-mode", choices=("percentile", "fixed_intensity"),
-                   default=None, help="default: data.yaml:clip_mode, else percentile")
+                   help="Load-bearing provenance label, e.g. gat_1_99.9, "
+                        "clip_percentile_1_99 or clip_fixed_120_350. No default on "
+                        "purpose; set it here or in data.yaml.")
+    p.add_argument("--clip-mode", choices=("gat", "percentile", "fixed_intensity"),
+                   default=None,
+                   help="gat: per-volume noise-model Anscombe transform stretched to "
+                        "0-255, no CLAHE (published under image_gat/). percentile / "
+                        "fixed_intensity: legacy per-plane clip + CLAHE (image/). "
+                        "default: data.yaml:clip_mode, else gat")
     p.add_argument("--clip-values", type=float, nargs=2, default=None,
-                   help="Percentiles for --clip-mode percentile, raw intensities for fixed. "
-                        "default: data.yaml:clip_values, else 1 99")
-    p.add_argument("--clip-limit", type=float, default=None)
+                   help="gat: transformed-intensity percentiles mapped to 0/255 "
+                        "(default 1 99.9). percentile: per-plane percentiles (default "
+                        "1 99). fixed_intensity: raw range. default: data.yaml:clip_values")
+    p.add_argument("--clip-limit", type=float, default=None,
+                   help="CLAHE clip limit for the legacy modes (default 0.03); "
+                        "refused with gat.")
     p.add_argument("--channel", type=int, default=None)
     p.add_argument("--exposure-ms", type=int, default=None,
                    help="Suffixes the name as <stem>_eNNN. From ND2 metadata, NEVER "
@@ -934,6 +973,8 @@ def main():
 
     ck = sub.add_parser("check", help="audit published groups for completeness")
     ck.add_argument("target", help="an expid (e.g. expid96) or a full gs:// prefix")
+    ck.add_argument("--image-dir", choices=("image", "image_gat"), default="image",
+                    help="legacy clip+CLAHE groups (image) or gat groups (image_gat)")
     _add_gcs_args(ck)
     ck.set_defaults(func=cmd_check)
 
@@ -974,9 +1015,13 @@ def main():
     _default(a, "bucket", cfg, "publish_bucket", DEFAULT_BUCKET)
     _default(a, "prefix", cfg, "publish_prefix", DEFAULT_PREFIX)
     _default(a, "clip_variant", cfg, "clip_variant")
-    _default(a, "clip_mode", cfg, "clip_mode", "percentile")
-    _default(a, "clip_values", cfg, "clip_values", [1.0, 99.0])
-    _default(a, "clip_limit", cfg, "clip_limit", 0.03)
+    _default(a, "clip_mode", cfg, "clip_mode", "gat")
+    gat = a.clip_mode == "gat"
+    _default(a, "clip_values", cfg, "clip_values", [1.0, 99.9] if gat else [1.0, 99.0])
+    _default(a, "clip_limit", cfg, "clip_limit", None if gat else 0.03)
+    if gat and a.clip_limit is not None and a.cmd in ("preprocess", "run"):
+        sys.exit("clip_limit (CLAHE) does not apply to clip_mode gat; remove it from "
+                 f"the command line and {CONFIG}, or pass --clip-mode percentile.")
     _default(a, "channel", cfg, "channel", 0)
 
     if a.cmd in ("preprocess", "run") and not a.clip_variant:

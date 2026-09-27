@@ -2,10 +2,21 @@
 """Prepare a single-tile LICONN structural volume for PyTC/FFN.
 
 The input is loaded at its native (level-0) resolution through PyTC's canonical
-volume reader. Each XY plane is independently clipped to a fixed raw intensity
-range (120--350 by default), normalized to [0, 1], enhanced with CLAHE, and
-converted to uint8. The processed volume can then be reduced by aligned ZYX
-arithmetic volume averaging. For a LICONN level-0 image at 12x9x9 nm ZYX,
+volume reader and mapped to uint8 by one of two intensity modes:
+
+* ``gat`` (default): LICONN fluorescence is shot-noise limited, with noise
+  variance ``gain * (x - offset)``. The volume's gain and offset are fitted from
+  low-structure blocks of sampled XY planes (or given with ``--noise-model``),
+  and the generalized Anscombe transform ``2 * sqrt((x - offset) / gain + 3/8)``
+  makes the noise ~1 unit everywhere. One affine stretch per volume then maps
+  the transformed 1st/99.9th percentiles to 0/255, so the stored data uses the
+  full uint8 range without saturating bright synaptic/vesicle puncta. The same
+  pointwise mapping is applied to every plane; no CLAHE.
+* ``linear``: each XY plane is clipped to a fixed raw range (120--350 by
+  default) or per-plane percentiles, optionally CLAHE-enhanced, then scaled.
+
+The processed volume can then be reduced by aligned ZYX arithmetic volume
+averaging. For a LICONN level-0 image at 12x9x9 nm ZYX,
 ``--downsample-factor 2 2 2`` produces the 24x18x18 nm FFN scale.
 
 ND2 inputs may contain multiple channels but must contain only one XY
@@ -15,8 +26,7 @@ preprocessing.
 
 Example:
     python scripts/preprocess_liconn.py raw_structural.nd2 ffn_image.h5 \
-        --channel 0 --clip-intensity-range 120 350 \
-        --downsample-factor 2 2 2 --input-spacing-nm 12 9 9
+        --channel 0 --downsample-factor 2 2 2 --input-spacing-nm 12 9 9
 """
 
 from __future__ import annotations
@@ -34,6 +44,8 @@ from connectomics.data.io import read_volume
 
 
 DEFAULT_CLIP_INTENSITY_RANGE = (120.0, 350.0)
+DEFAULT_STRETCH_PERCENTILES = (1.0, 99.9)
+DEFAULT_STATS_PLANES = 16
 
 
 def preprocess_xy_plane(
@@ -42,9 +54,9 @@ def preprocess_xy_plane(
     lower_percentile: float = 1.0,
     upper_percentile: float = 99.0,
     clip_intensity_range: tuple[float, float] | None = DEFAULT_CLIP_INTENSITY_RANGE,
-    clip_limit: float = 0.03,
+    clip_limit: float | None = None,
 ) -> np.ndarray:
-    """Clip and CLAHE-enhance one XY plane as uint8."""
+    """Clip one XY plane, optionally CLAHE-enhance it, and return uint8."""
     if plane.ndim != 2:
         raise ValueError(f"Expected a 2D XY plane, got shape {plane.shape}.")
     if clip_intensity_range is None and not (
@@ -54,7 +66,7 @@ def preprocess_xy_plane(
             "Percentiles must satisfy 0 <= lower < upper <= 100; "
             f"got {lower_percentile} and {upper_percentile}."
         )
-    if clip_limit <= 0.0:
+    if clip_limit is not None and clip_limit <= 0.0:
         raise ValueError(f"CLAHE clip_limit must be positive, got {clip_limit}.")
 
     plane_float = np.asarray(plane, dtype=np.float32)
@@ -72,8 +84,9 @@ def preprocess_xy_plane(
         return np.zeros(plane.shape, dtype=np.uint8)
 
     normalized = np.clip((plane_float - low) / (high - low), 0.0, 1.0)
-    enhanced = exposure.equalize_adapthist(normalized, clip_limit=clip_limit)
-    return np.clip(np.rint(enhanced * 255.0), 0.0, 255.0).astype(np.uint8)
+    if clip_limit is not None:
+        normalized = exposure.equalize_adapthist(normalized, clip_limit=clip_limit)
+    return np.clip(np.rint(normalized * 255.0), 0.0, 255.0).astype(np.uint8)
 
 
 def _validate_downsample_factor(
@@ -163,10 +176,14 @@ def preprocess_liconn(
     *,
     channel: int = 0,
     dataset: str = "main",
+    intensity_mode: str = "gat",
+    stretch_percentiles: tuple[float, float] = DEFAULT_STRETCH_PERCENTILES,
+    stats_planes: int = DEFAULT_STATS_PLANES,
+    noise_model: tuple[float, float] | None = None,
     lower_percentile: float = 1.0,
     upper_percentile: float = 99.0,
     clip_intensity_range: tuple[float, float] | None = DEFAULT_CLIP_INTENSITY_RANGE,
-    clip_limit: float = 0.03,
+    clip_limit: float | None = None,
     downsample_factor: tuple[int, int, int] = (1, 1, 1),
     input_spacing_nm: tuple[float, float, float] | None = None,
     compression: str | None = "gzip",
@@ -175,8 +192,9 @@ def preprocess_liconn(
 ) -> Path:
     """Preprocess one LICONN volume and atomically write a uint8 HDF5 file.
 
-    CLAHE is applied before downsampling. Downsampling is streamed over source
-    Z planes so the full processed uint8 volume is never materialized in memory.
+    The intensity mapping is applied before downsampling. Downsampling is
+    streamed over source Z planes so the full processed uint8 volume is never
+    materialized in memory.
     """
     if not input_path.exists():
         raise FileNotFoundError(f"Input not found: {input_path}")
@@ -188,6 +206,8 @@ def preprocess_liconn(
         )
     if not dataset or dataset.strip("/") == "":
         raise ValueError("HDF5 dataset name must not be empty.")
+    if intensity_mode not in {"gat", "linear"}:
+        raise ValueError(f"Unknown intensity_mode {intensity_mode!r}; use 'gat' or 'linear'.")
     if compression not in {None, "gzip", "lzf"}:
         raise ValueError(f"Unsupported HDF5 compression: {compression!r}.")
     if compression == "gzip" and not 0 <= compression_level <= 9:
@@ -201,6 +221,44 @@ def preprocess_liconn(
     z_factor, y_factor, x_factor = downsample_factor
     output_shape = (z_size // z_factor, y_size // y_factor, x_size // x_factor)
     output_z_size, output_y_size, output_x_size = output_shape
+
+    if intensity_mode == "gat":
+        # Imported here, not at module level: tutorials/liconn_ingest/nd2_source.py
+        # loads this script with `connectomics` stubbed down to `read_volume`.
+        from connectomics.data.normalization import anscombe_to_uint8, fit_anscombe_mapping
+
+        mapping = fit_anscombe_mapping(
+            structural,
+            stats_planes=stats_planes,
+            stretch_percentiles=stretch_percentiles,
+            noise_model=noise_model,
+        )
+        low, high = mapping["stretch_range"]
+        print(
+            f"Noise model ({mapping['noise_model_source']}): variance = "
+            f"{mapping['gain']:.3f} * (x - {mapping['offset']:.1f}); "
+            f"transformed range [{low:.2f}, {high:.2f}] -> [0, 255], "
+            f"noise sigma = {255.0 / (high - low):.1f} uint8 levels"
+        )
+
+        def process_plane(plane: np.ndarray) -> np.ndarray:
+            return anscombe_to_uint8(
+                plane,
+                gain=mapping["gain"],
+                offset=mapping["offset"],
+                stretch_range=mapping["stretch_range"],
+            )
+
+    else:
+
+        def process_plane(plane: np.ndarray) -> np.ndarray:
+            return preprocess_xy_plane(
+                plane,
+                lower_percentile=lower_percentile,
+                upper_percentile=upper_percentile,
+                clip_intensity_range=clip_intensity_range,
+                clip_limit=clip_limit,
+            )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     temp_file = tempfile.NamedTemporaryFile(
@@ -233,13 +291,26 @@ def preprocess_liconn(
                 output.attrs["spacing_nm_zyx"] = input_spacing * np.asarray(
                     downsample_factor, dtype=np.float64
                 )
-            if clip_intensity_range is None:
-                output.attrs["clip_mode"] = "percentile"
-                output.attrs["clip_percentiles"] = (lower_percentile, upper_percentile)
+            if intensity_mode == "gat":
+                output.attrs["intensity_mode"] = "gat"
+                output.attrs["noise_model"] = "variance = gain * (x - offset)"
+                output.attrs["noise_gain"] = mapping["gain"]
+                output.attrs["noise_offset"] = mapping["offset"]
+                output.attrs["noise_model_source"] = mapping["noise_model_source"]
+                output.attrs["stats_z_indices"] = mapping["stats_z_indices"]
+                output.attrs["stretch_percentiles"] = mapping["stretch_percentiles"]
+                output.attrs["stretch_range_anscombe"] = mapping["stretch_range"]
+                output.attrs["noise_sigma_uint8_levels"] = 255.0 / (high - low)
             else:
-                output.attrs["clip_mode"] = "fixed_intensity"
-                output.attrs["clip_intensity_range"] = clip_intensity_range
-            output.attrs["clahe_clip_limit"] = clip_limit
+                if clip_intensity_range is None:
+                    output.attrs["clip_mode"] = "percentile"
+                    output.attrs["clip_percentiles"] = (lower_percentile, upper_percentile)
+                else:
+                    output.attrs["clip_mode"] = "fixed_intensity"
+                    output.attrs["clip_intensity_range"] = clip_intensity_range
+                output.attrs["clahe_clip_limit"] = (
+                    "none" if clip_limit is None else clip_limit
+                )
 
             block_voxels = z_factor * y_factor * x_factor
             for output_z in range(output_z_size):
@@ -247,13 +318,7 @@ def preprocess_liconn(
                 source_z_start = output_z * z_factor
                 for z_offset in range(z_factor):
                     source_z = source_z_start + z_offset
-                    processed_plane = preprocess_xy_plane(
-                        structural[source_z],
-                        lower_percentile=lower_percentile,
-                        upper_percentile=upper_percentile,
-                        clip_intensity_range=clip_intensity_range,
-                        clip_limit=clip_limit,
-                    )
+                    processed_plane = process_plane(structural[source_z])
                     plane_blocks = processed_plane.astype(np.uint32).reshape(
                         output_y_size,
                         y_factor,
@@ -279,9 +344,9 @@ def preprocess_liconn(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Apply per-XY-plane clipping and CLAHE to a single-tile LICONN structural "
-            "volume, optionally reduce it by aligned volume averaging, then save "
-            "losslessly compressed uint8 HDF5."
+            "Map a single-tile LICONN structural volume to uint8 (noise-stabilizing "
+            "Anscombe transform by default), optionally reduce it by aligned volume "
+            "averaging, then save losslessly compressed uint8 HDF5."
         )
     )
     parser.add_argument("input", type=Path, help="Input volume (typically a single-tile ND2 file).")
@@ -295,6 +360,37 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dataset", default="main", help="Output HDF5 dataset name. Default: main."
     )
+    parser.add_argument(
+        "--intensity-mode",
+        choices=("gat", "linear"),
+        default="gat",
+        help=(
+            "gat: per-volume noise-model Anscombe transform stretched to 0-255 "
+            "(default). linear: per-plane clip (+ optional CLAHE)."
+        ),
+    )
+    parser.add_argument(
+        "--stretch-percentiles",
+        type=float,
+        nargs=2,
+        metavar=("LOW", "HIGH"),
+        default=DEFAULT_STRETCH_PERCENTILES,
+        help="gat: transformed-intensity percentiles mapped to 0 and 255. Default: 1 99.9.",
+    )
+    parser.add_argument(
+        "--stats-planes",
+        type=int,
+        default=DEFAULT_STATS_PLANES,
+        help="gat: evenly spaced Z planes used for the volume statistics. Default: 16.",
+    )
+    parser.add_argument(
+        "--noise-model",
+        type=float,
+        nargs=2,
+        metavar=("GAIN", "OFFSET"),
+        default=None,
+        help="gat: use variance = GAIN * (x - OFFSET) instead of fitting it.",
+    )
     clipping = parser.add_mutually_exclusive_group()
     clipping.add_argument(
         "--clip-intensity-range",
@@ -303,7 +399,7 @@ def parse_args() -> argparse.Namespace:
         metavar=("LOW", "HIGH"),
         default=DEFAULT_CLIP_INTENSITY_RANGE,
         help=(
-            "Fixed raw intensity clipping range applied to every XY plane. "
+            "linear: fixed raw intensity clipping range applied to every XY plane. "
             "Default: 120 350."
         ),
     )
@@ -314,15 +410,15 @@ def parse_args() -> argparse.Namespace:
         metavar=("LOW", "HIGH"),
         default=None,
         help=(
-            "Use per-plane percentile clipping instead of the fixed paper-like range. "
+            "linear: per-plane percentile clipping instead of the fixed range. "
             "Example: --clip-percentiles 1 99."
         ),
     )
     parser.add_argument(
         "--clip-limit",
         type=float,
-        default=0.03,
-        help="skimage CLAHE clip limit. Default: 0.03.",
+        default=None,
+        help="linear: skimage CLAHE clip limit, e.g. 0.03. Default: no CLAHE.",
     )
     parser.add_argument(
         "--downsample-factor",
@@ -331,7 +427,7 @@ def parse_args() -> argparse.Namespace:
         metavar=("Z", "Y", "X"),
         default=(1, 1, 1),
         help=(
-            "Aligned ZYX arithmetic volume-averaging factor after CLAHE. "
+            "Aligned ZYX arithmetic volume-averaging factor after intensity mapping. "
             "Use 2 2 2 for LICONN 12x9x9 nm ZYX to FFN 24x18x18 nm. Default: 1 1 1."
         ),
     )
@@ -375,6 +471,10 @@ def main() -> None:
         args.output,
         channel=args.channel,
         dataset=args.dataset,
+        intensity_mode=args.intensity_mode,
+        stretch_percentiles=tuple(args.stretch_percentiles),
+        stats_planes=args.stats_planes,
+        noise_model=tuple(args.noise_model) if args.noise_model is not None else None,
         lower_percentile=lower_percentile,
         upper_percentile=upper_percentile,
         clip_intensity_range=clip_intensity_range,

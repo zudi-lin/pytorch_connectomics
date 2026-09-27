@@ -87,6 +87,37 @@ def test_fixed_intensity_swaps_only_the_clip_keys():
     assert "clip_percentiles" not in attrs
 
 
+GAT_MAPPING = {"gain": 6.5, "offset": 141.7, "noise_model_source": "estimated",
+               "stretch_percentiles": [1.0, 99.9], "stretch_range": [4.34, 16.67],
+               "stats_z_indices": [0, 39, 78]}
+
+
+def test_gat_records_the_mapping_instead_of_clip_and_clahe_keys():
+    attrs = zw.provenance_attrs(
+        source="x.nd2", source_channel=0, source_shape_zyx=(1, 1, 1),
+        spacing_nm_zyx=(1, 1, 1), clip_mode="gat", clip_values=(1.0, 99.9),
+        clip_limit=None, mapping=GAT_MAPPING)
+    assert attrs["intensity_mode"] == "gat"
+    assert attrs["noise_gain"] == 6.5 and attrs["noise_offset"] == 141.7
+    assert attrs["stretch_range_anscombe"] == [4.34, 16.67]
+    assert abs(attrs["noise_sigma_uint8_levels"] - 255.0 / (16.67 - 4.34)) < 1e-9
+    for legacy in ("clip_mode", "clip_percentiles", "clip_intensity_range",
+                   "clahe_clip_limit"):
+        assert legacy not in attrs
+    json.dumps(attrs)                               # .zattrs must serialise
+
+
+def test_gat_without_its_mapping_is_refused():
+    try:
+        zw.provenance_attrs(source="x", source_channel=0, source_shape_zyx=(1, 1, 1),
+                            spacing_nm_zyx=(1, 1, 1), clip_mode="gat",
+                            clip_values=(1.0, 99.9), clip_limit=None)
+    except ValueError as e:
+        assert "mapping" in str(e)
+    else:
+        raise AssertionError("expected ValueError for gat without a mapping")
+
+
 def test_write_pyramid_reproduces_the_published_metadata():
     """End-to-end on a volume small enough to check by hand, big enough to
     exercise more than one chunk row and a full 4-level reduction."""

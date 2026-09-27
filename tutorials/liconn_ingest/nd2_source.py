@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Stream one LICONN ND2 as CLAHE'd uint8 ZYX planes.
+"""Stream one LICONN ND2 as uint8 ZYX planes.
+
+Two intensity paths. `gat` (the default in ingest.py) fits one noise model and
+one stretch per volume from sampled planes (`fit_anscombe`), then maps every
+plane with that same pointwise function -- see
+`connectomics/data/normalization/anscombe.py`. The legacy `percentile` /
+`fixed_intensity` paths clip each plane on its own and apply CLAHE through
+`scripts/preprocess_liconn.py::preprocess_xy_plane`.
 
 WHY NOT `connectomics.data.io.read_volume`. Two reasons, both practical.
 `connectomics/data/__init__.py` imports the augmentation and dataset packages,
@@ -28,6 +35,30 @@ _PREPROCESS_CANDIDATES = (
     Path(__file__).resolve().parents[2] / "scripts" / "preprocess_liconn.py",
     Path("/workspace/scripts/preprocess_liconn.py"),
 )
+_ANSCOMBE_RELATIVE = Path("connectomics") / "data" / "normalization" / "anscombe.py"
+_ANSCOMBE_CANDIDATES = (
+    Path(__file__).resolve().parents[2] / _ANSCOMBE_RELATIVE,
+    Path("/workspace") / _ANSCOMBE_RELATIVE,
+)
+DEFAULT_STATS_PLANES = 16
+
+
+def load_anscombe_module():
+    """Load the repo's Anscombe normalization by path, not via `connectomics`.
+
+    Importing the package would pull torch and MONAI into this CPU image (see
+    the top of this file); `anscombe.py` needs only numpy and scipy, so the
+    pixel math stays the repo's rather than a copy.
+    """
+    for path in _ANSCOMBE_CANDIDATES:
+        if path.exists():
+            break
+    else:
+        raise FileNotFoundError(f"anscombe.py not found in {_ANSCOMBE_CANDIDATES}")
+    spec = importlib.util.spec_from_file_location("_liconn_anscombe", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def load_preprocess_module():
@@ -155,15 +186,71 @@ def channel_exposures_ms(path: str | Path) -> dict:
     return parsed
 
 
-def iter_planes(path: str | Path, channel: int = 0, *, clip_mode: str = "percentile",
-                clip_values=(1.0, 99.0), clip_limit: float = 0.03):
-    """Yield CLAHE'd uint8 YX planes in Z order.
+def _structural_lazy(f, path: str, channel: int):
+    """The open ND2's structural channel as a lazy ZYX dask array."""
+    sizes = {str(axis): int(size) for axis, size in f.sizes.items()}
+    axes, _shape = output_axes_and_shape(path, sizes)
+    n_c = sizes.get("C", 1)
+    if channel >= n_c:
+        raise ValueError(f"channel {channel} out of range for {n_c} channels in {path}")
+    lazy = f.to_dask()                      # input axis order, lazy
+    input_axes = list(sizes)
+    permutation = tuple(input_axes.index(a) for a in axes)
+    lazy = lazy.transpose(permutation)      # -> (C,)Z,Y,X
+    if axes[0] == "C":
+        lazy = lazy[channel]
+    elif channel != 0:
+        raise ValueError(f"{path} has no channel axis; use --channel 0")
+    return lazy
 
-    Percentiles are per plane in `preprocess_xy_plane`, so streaming is exactly
-    equivalent to processing the whole volume at once -- no global statistic is
-    lost by never holding the volume.
+
+def fit_anscombe(path: str | Path, channel: int = 0, *, stretch_percentiles=(1.0, 99.9),
+                 stats_planes: int = DEFAULT_STATS_PLANES) -> dict:
+    """Fit the volume's noise model and stretch; returns a JSON-ready mapping.
+
+    Reads only `stats_planes` evenly spaced planes. The result is what
+    `iter_planes(clip_mode="gat", mapping=...)` applies to every plane and what
+    `zarr_writer.provenance_attrs` records.
     """
     import nd2
+
+    ans = load_anscombe_module()
+    path = str(path)
+    with nd2.ND2File(path) as f:
+        mapping = ans.fit_anscombe_mapping(
+            _structural_lazy(f, path, channel), stats_planes=stats_planes,
+            stretch_percentiles=tuple(float(v) for v in stretch_percentiles))
+    return anscombe_mapping_json(mapping)
+
+
+def anscombe_mapping_json(mapping: dict) -> dict:
+    """`fit_anscombe_mapping` output as plain JSON types, for .zattrs/provenance."""
+    return {"gain": float(mapping["gain"]), "offset": float(mapping["offset"]),
+            "noise_model_source": mapping["noise_model_source"],
+            "stretch_percentiles": [float(v) for v in mapping["stretch_percentiles"]],
+            "stretch_range": [float(v) for v in mapping["stretch_range"]],
+            "stats_z_indices": [int(v) for v in mapping["stats_z_indices"]]}
+
+
+def plane_mapper(clip_mode: str, clip_values=(1.0, 99.0), clip_limit: float | None = 0.03,
+                 mapping: dict | None = None):
+    """The raw-plane -> uint8-plane function for one volume.
+
+    `gat` applies the volume's fixed Anscombe mapping (fitted up front, so
+    streaming stays exactly equivalent to a whole-volume pass). The legacy modes
+    compute their percentiles per plane, which is streaming-safe for the same
+    reason: no plane's output depends on another plane.
+    """
+    if clip_mode == "gat":
+        if mapping is None:
+            raise ValueError("clip_mode 'gat' needs the volume mapping from fit_anscombe")
+        if clip_limit is not None:
+            raise ValueError("CLAHE does not apply to clip_mode 'gat'; unset clip_limit")
+        ans = load_anscombe_module()
+        gain, offset = mapping["gain"], mapping["offset"]
+        stretch = tuple(mapping["stretch_range"])
+        return lambda plane: ans.anscombe_to_uint8(plane, gain=gain, offset=offset,
+                                                   stretch_range=stretch)
 
     pre = load_preprocess_module()
     kwargs = {"clip_limit": clip_limit}
@@ -175,21 +262,18 @@ def iter_planes(path: str | Path, channel: int = 0, *, clip_mode: str = "percent
         kwargs.update(clip_intensity_range=(float(clip_values[0]), float(clip_values[1])))
     else:
         raise ValueError(f"unknown clip_mode {clip_mode!r}")
+    return lambda plane: pre.preprocess_xy_plane(plane, **kwargs)
 
+
+def iter_planes(path: str | Path, channel: int = 0, *, clip_mode: str = "percentile",
+                clip_values=(1.0, 99.0), clip_limit: float | None = 0.03,
+                mapping: dict | None = None):
+    """Yield uint8 YX planes in Z order; see `plane_mapper` for the intensity path."""
+    import nd2
+
+    to_uint8 = plane_mapper(clip_mode, clip_values, clip_limit, mapping)
     path = str(path)
     with nd2.ND2File(path) as f:
-        sizes = {str(axis): int(size) for axis, size in f.sizes.items()}
-        axes, _shape = output_axes_and_shape(path, sizes)
-        n_c = sizes.get("C", 1)
-        if channel >= n_c:
-            raise ValueError(f"channel {channel} out of range for {n_c} channels in {path}")
-        lazy = f.to_dask()                      # input axis order, lazy
-        input_axes = list(sizes)
-        permutation = tuple(input_axes.index(a) for a in axes)
-        lazy = lazy.transpose(permutation)      # -> (C,)Z,Y,X
-        if axes[0] == "C":
-            lazy = lazy[channel]
-        elif channel != 0:
-            raise ValueError(f"{path} has no channel axis; use --channel 0")
+        lazy = _structural_lazy(f, path, channel)
         for z in range(lazy.shape[0]):
-            yield pre.preprocess_xy_plane(np.asarray(lazy[z]), **kwargs)
+            yield to_uint8(np.asarray(lazy[z]))

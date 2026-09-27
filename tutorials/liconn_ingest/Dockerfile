@@ -41,10 +41,13 @@ RUN python -m pip install --no-cache-dir \
 WORKDIR /workspace
 COPY tutorials/liconn_ingest /workspace/tutorials/liconn_ingest
 COPY scripts/preprocess_liconn.py /workspace/scripts/preprocess_liconn.py
+# The gat intensity path, loaded by file path so the image needs no torch/MONAI.
+COPY connectomics/data/normalization/anscombe.py \
+     /workspace/connectomics/data/normalization/anscombe.py
 
 # Import smoke test: proves the wheels brought their own shared libraries,
 # since there is no apt layer to supply them.
-RUN python -c "import numpy, zarr, numcodecs, nd2, dask.array, skimage.exposure; \
+RUN python -c "import numpy, scipy.ndimage, zarr, numcodecs, nd2, dask.array, skimage.exposure; \
 print('imports ok', numpy.__version__, zarr.__version__, nd2.__version__)"
 
 # Build-time gates. The filename grammar and the spacing arithmetic fail

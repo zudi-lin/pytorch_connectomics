@@ -26,10 +26,11 @@ publish_prefix: liconn/moe
 # dataset names exist, so dropping it collides them. See
 # tutorials/neuron_liconn_moe/volumes.py::GCS_PREFIX. `ingest.py` has no default
 # for it on purpose, and this file is the only place to set one.
-clip_variant: FILL              # clip_percentile_1_99 | clip_fixed_120_350
-clip_mode: percentile          # percentile | fixed_intensity
-clip_values: [1.0, 99.0]       # percentiles, or raw intensities e.g. [120.0, 350.0]
-clip_limit: 0.03
+clip_variant: FILL              # gat_1_99.9 | clip_percentile_1_99 | clip_fixed_120_350
+clip_mode: gat                  # gat (default; publishes under image_gat/) | percentile | fixed_intensity
+clip_values: [1.0, 99.9]        # gat: transformed percentiles -> 0/255; percentile: [1, 99];
+                                # fixed_intensity: raw range e.g. [120.0, 350.0]
+# clip_limit: 0.03              # CLAHE, legacy modes only; must be absent for gat
 channel: 0                      # index of the structural/membrane channel
 
 # --- Drops to ingest -------------------------------------------------------
