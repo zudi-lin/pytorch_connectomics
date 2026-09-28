@@ -3,7 +3,8 @@
 gate the Docker build).
 
 `test_naming` and `test_ingest` are pure and always run. `test_zarr_writer` and
-`test_nd2_source` need numpy/zarr/scikit-image and are SKIPPED, loudly, when
+`test_nd2_source`, `test_janelia_n5`, and `test_janelia_batch` need the image
+processing dependencies and are SKIPPED, loudly, when
 those are absent -- so this file is still useful on the host, while the image
 build (where they are installed) runs the full set.
 """
@@ -13,7 +14,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-MODULES = ["test_naming", "test_ingest", "test_zarr_writer", "test_nd2_source"]
+MODULES = ["test_naming", "test_ingest", "test_zarr_writer", "test_nd2_source",
+           "test_janelia_n5", "test_janelia_batch"]
 
 passed = failed = skipped = 0
 for name in MODULES:

@@ -8,7 +8,7 @@ z-plane per N5 block), `CH00_000000.xml` and `experiment.yml`.
 Per tile this writes two groups with the SAME intensity mapping:
 
   <name>_sheared.zarr   raw acquisition geometry, (Z, Y, X) as recorded
-  <name>_deskew.zarr    plane z shifted by -shear*z px in Y (linear interp)
+  <name>_deskew.zarr    projected stage-scan YZ shear, resampled along Y
 
 Intensity, `--intensity-mode`:
   gat (default)  the `scripts/preprocess_liconn.py` default: one shot-noise model
@@ -21,18 +21,17 @@ The fit runs on the RAW (sheared) frames, where the noise model holds. The
 deskew is applied to the pre-rounding 0-255 float plane, so it is a pure
 geometric resample of `_sheared`.
 
-Geometry (read, not chosen): the XML ViewRegistration "Shearing Transform" is
-y' = y + a*z in pixel units (a = -2.380952 = -step/xy_px for this microscope),
-and ClearEx's stage-scan path on the same experiment.yml resolves to the same
-thing: shear_yz = tan(-45 deg) in physical um with z spacing = stage step
-(0.4 um). So the deskewed group's z spacing is the stage step, and the sheared
-group's is the XML voxel z (step*sin45, the plane-normal spacing).
+For this stage-Z scan, project the mechanical step onto camera Y and Z using
+the recorded scan angle. The XML Y shear uses the unprojected step, whereas
+its Z spacing is already projected; do not mix these two conventions. Full
+coverage retains a diagonal valid-data footprint in the output bounding box.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import struct
 import subprocess
@@ -75,10 +74,49 @@ def read_geometry(ds: Path, setup: int) -> dict:
         elif t.get("Name") == "Translation to Regular Grid":
             grid = [m[3], m[7], m[11]]
     exp = json.loads((ds / "experiment.yml").read_text())
+    state = exp["MicroscopeState"]
+    bdv_shear = exp["BDVParameters"]["shear"]
+    if not bdv_shear["shear_data"] or bdv_shear["shear_dimension"] != "YZ":
+        raise ValueError("expected a Navigate YZ stage-scan dataset")
     return {"size_zyx": size_xyz[::-1], "voxel_um_zyx": vox_xyz[::-1],
             "shear_px_per_plane": shear, "grid_translation_xyz": grid,
-            "step_um": float(exp["MicroscopeState"]["step_size"]),
+            "step_um": float(state["step_size"]),
+            "scan_axis": state["primary_z_axis"],
+            "image_mode": state["image_mode"],
+            "waveform_template": state["waveform_template"],
+            "shear_angle_deg": float(bdv_shear["shear_angle"]),
             "label_488nm": exp.get("Saving", {}).get("label_488nm")}
+
+
+def resolve_deskew_calibration(g: dict, shear_override: float | None = None) -> dict:
+    """Project a mechanical stage-Z step, as in PetaKit's stage-scan deskew.
+
+    This is deliberately limited to the ordinary Navigate z-stack acquisition.
+    Constant-velocity scans can encode an optical, already-projected step.
+    """
+    if (g["scan_axis"] != "z" or g["image_mode"] != "z-stack"
+            or g["waveform_template"] != "Default"):
+        raise ValueError("projected deskew requires a Default z-stack on stage z")
+    step = g["step_um"]
+    vz, vy, vx = g["voxel_um_zyx"]
+    if any(not math.isfinite(v) or v <= 0 for v in (step, vz, vy, vx)):
+        raise ValueError("stage step and voxel spacings must be finite and positive")
+    angle = (g["shear_angle_deg"] + 180.0) % 360.0 - 180.0
+    if not math.isfinite(angle) or not 0 < abs(angle) <= 90:
+        raise ValueError("stage-scan angle must have magnitude in (0, 90] degrees")
+    theta = math.radians(abs(angle))
+    z_spacing = step * math.sin(theta)
+    if not math.isclose(vz, z_spacing, rel_tol=1e-5, abs_tol=1e-9):
+        raise ValueError("XML Z spacing disagrees with the projected stage step")
+    lateral_step = 0.0 if abs(angle) == 90.0 else step * math.cos(theta)
+    shear = math.copysign(lateral_step / vy, angle)
+    if shear_override is not None:
+        if not math.isfinite(shear_override):
+            raise ValueError("shear override must be finite")
+        shear = shear_override
+    return {"shear_px_per_plane": shear, "z_spacing_um": z_spacing,
+            "angle_deg": angle,
+            "shear_source": "stage_projection" if shear_override is None else "cli"}
 
 
 def normalize(plane: np.ndarray, lo_p: float, hi_p: float) -> np.ndarray:
@@ -94,15 +132,55 @@ def to_u8(x: np.ndarray) -> np.ndarray:
     return np.clip(np.rint(x), 0, 255).astype(np.uint8)
 
 
-def shift_y(x: np.ndarray, out_ny: int, y0: float) -> np.ndarray:
-    """Place `x` so its row 0 lands at output row y0 (fractional), linear interp."""
-    ny = x.shape[0]
-    i = int(np.floor(y0))
-    f = y0 - i
-    out = np.zeros((out_ny, x.shape[1]), np.float32)
-    out[i:i + ny] += (1.0 - f) * x
-    out[i + 1:i + 1 + ny] += f * x[: out_ny - i - 1]
-    return out
+def deskew_geometry(nz: int, ny: int, shear: float) -> dict:
+    """Return the pixel bounds of a full-volume YZ shear."""
+    if not math.isfinite(shear):
+        raise ValueError("shear must be finite")
+    if nz < 1 or ny < 1:
+        raise ValueError("source dimensions must be positive")
+    extent = abs(shear) * (nz - 1)
+    return {"shape_zy": (nz, ny + math.ceil(extent)),
+            "y_offset": max(0.0, -shear * (nz - 1)),
+            "shear_px_per_plane": shear}
+
+
+def deskew_planes(get_plane, shape_zyx: tuple[int, int, int], geometry: dict):
+    """Inverse-map Y and normalize partial boundary support as ClearEx does."""
+    nz, ny, nx = shape_zyx
+    out_ny = geometry["shape_zy"][1]
+    output_rows = np.arange(out_ny)
+    for z in range(nz):
+        source_rows = output_rows - geometry["y_offset"] - geometry["shear_px_per_plane"] * z
+        lower = np.floor(source_rows).astype(np.int64)
+        fraction = source_rows - lower
+        upper = lower + 1
+        valid_lower = (lower >= 0) & (lower < ny)
+        valid_upper = (upper >= 0) & (upper < ny)
+        plane = get_plane(z)
+        out = np.zeros((out_ny, nx), np.float32)
+        support = np.zeros(out_ny, np.float32)
+        out[valid_lower] += ((1.0 - fraction[valid_lower, None])
+                             * plane[lower[valid_lower]])
+        support[valid_lower] += 1.0 - fraction[valid_lower]
+        out[valid_upper] += fraction[valid_upper, None] * plane[upper[valid_upper]]
+        support[valid_upper] += fraction[valid_upper]
+        np.divide(out, support[:, None], out=out, where=support[:, None] > 1e-6)
+        yield to_u8(out)
+
+
+def check_existing_deskew(dest: Path, shear: float, z_spacing_um: float) -> None:
+    """Do not silently reuse a differently transformed group."""
+    attrs = json.loads((dest / ".zattrs").read_text())
+    deskew = attrs.get("deskew", {})
+    existing = deskew.get("shear_px_per_plane")
+    existing_z = deskew.get("z_spacing_um")
+    if (deskew.get("method") != "projected_stage_scan_y_shear" or existing is None
+            or existing_z is None
+            or not math.isclose(float(existing), shear, rel_tol=0, abs_tol=1e-9)
+            or not math.isclose(float(existing_z), z_spacing_um, rel_tol=0, abs_tol=1e-9)):
+        raise ValueError(
+            f"{dest} has an older or different deskew transform; pass --force to rewrite"
+        )
 
 
 def main():
@@ -121,6 +199,8 @@ def main():
     p.add_argument("--force", action="store_true", help="rewrite existing local groups")
     p.add_argument("--fold", type=float, default=None,
                    help="expansion fold; default parsed from experiment.yml label_488nm")
+    p.add_argument("--shear-px-per-plane", type=float, default=None,
+                   help="override projected Y shift per Z plane; keeps calibrated Z spacing")
     p.add_argument("--bucket", default="donglai_public")
     p.add_argument("--prefix", default="liconn/janelia")
     p.add_argument("--upload", action="store_true")
@@ -137,11 +217,15 @@ def main():
             sys.exit(f"no fold in label_488nm={g['label_488nm']!r}; pass --fold")
         fold = float(m.group(1))
     nz, ny, nx = g["size_zyx"]
-    s = g["shear_px_per_plane"]
+    xml_shear = g["shear_px_per_plane"]
+    calibration = resolve_deskew_calibration(g, a.shear_px_per_plane)
+    s = calibration["shear_px_per_plane"]
     vz, vy, vx = g["voxel_um_zyx"]
+    geometry = deskew_geometry(nz, ny, s)
+    out_nz, out_ny = geometry["shape_zy"]
     dataset_id = f"{ds.parent.name}_{ds.name}"
     name = f"{dataset_id}_setup{a.setup:02d}"
-    print(json.dumps({**g, "fold": fold, "name": name}, indent=1))
+    print(json.dumps({**g, "fold": fold, "name": name, "deskew": calibration}, indent=1))
 
     if a.intensity_mode == "gat":
         ans = load_anscombe_module()
@@ -157,13 +241,14 @@ def main():
             stretch_percentiles=tuple(a.stretch_percentiles),
             noise_model=tuple(a.noise_model) if a.noise_model else None)
         low, high = mapping["stretch_range"]
-        gain, offset = mapping["gain"], mapping["offset"]
-        print(f"noise model ({mapping['noise_model_source']}): var = {gain:.3f}*(x-{offset:.1f}); "
+        gain, noise_offset = mapping["gain"], mapping["offset"]
+        print(f"noise model ({mapping['noise_model_source']}): "
+              f"var = {gain:.3f}*(x-{noise_offset:.1f}); "
               f"transformed [{low:.2f}, {high:.2f}] -> [0,255]; "
               f"noise sigma = {255.0 / (high - low):.1f} uint8 levels")
         intensity = {"intensity_mode": "gat",
                      "noise_model": "variance = gain * (x - offset)",
-                     "noise_gain": gain, "noise_offset": offset,
+                     "noise_gain": gain, "noise_offset": noise_offset,
                      "noise_model_source": mapping["noise_model_source"],
                      "stats_z_indices": [int(v) for v in mapping["stats_z_indices"]],
                      "stretch_percentiles": list(mapping["stretch_percentiles"]),
@@ -171,7 +256,7 @@ def main():
                      "noise_sigma_uint8_levels": 255.0 / (high - low)}
 
         def to_float(plane):
-            t = ans.anscombe_transform(plane, gain, offset)
+            t = ans.anscombe_transform(plane, gain, noise_offset)
             return np.clip((t - low) * (255.0 / (high - low)), 0.0, 255.0)
     else:
         intensity = {"intensity_mode": "linear", "clip_mode": "percentile",
@@ -184,25 +269,31 @@ def main():
             "source_dtype": "uint16", **intensity,
             "clahe": False, "expansion_fold": fold,
             "fold_source": "cli" if a.fold else "experiment.yml:Saving.label_488nm",
-            "spacing_basis": "biological", "xml_shear_px_per_plane": s,
+            "spacing_basis": "biological", "xml_shear_px_per_plane": xml_shear,
             "grid_translation_xyz_px": g["grid_translation_xyz"],
             "stage_step_um": g["step_um"]}
 
-    off = abs(s) * (nz - 1)
-    out_ny = ny + int(np.ceil(off)) + 1
+    deskew_attrs = {"method": "projected_stage_scan_y_shear",
+                    "y_out = y + shear*z + offset": True,
+                    "offset_px": geometry["y_offset"],
+                    "rotation_deg": 0.0,
+                    **calibration,
+                    "source_to_output_zyx": [[1, 0, 0, 0],
+                                             [s, 1, 0, geometry["y_offset"]],
+                                             [0, 0, 1, 0], [0, 0, 0, 1]],
+                    "interp": "linear_y_support_normalized", "fill": 0}
+
     variants = {
         "sheared": dict(shape=(nz, ny, nx),
                         spacing=[vz * 1000 / fold, vy * 1000 / fold, vx * 1000 / fold],
                         extra={"geometry": "sheared_raw_acquisition",
                                "spacing_note": "z = XML voxel z (plane-normal spacing); "
                                                "volume is NOT deskewed"}),
-        "deskew": dict(shape=(nz, out_ny, nx),
-                       spacing=[g["step_um"] * 1000 / fold, vy * 1000 / fold, vx * 1000 / fold],
+        "deskew": dict(shape=(out_nz, out_ny, nx),
+                       spacing=[calibration["z_spacing_um"] * 1000 / fold, vy * 1000 / fold,
+                                vx * 1000 / fold],
                        extra={"geometry": "deskewed_yz",
-                              "deskew": {"y_out = y + shear*z + offset": True,
-                                         "shear_px_per_plane": s, "offset_px": off if s < 0 else 0.0,
-                                         "interp": "linear", "fill": 0,
-                                         "equivalent": "ClearEx shear_yz_deg=-45, z=stage step"}}),
+                              "deskew": deskew_attrs}),
     }
 
     for v, spec in variants.items():
@@ -210,19 +301,20 @@ def main():
             continue
         dest = a.work / name / f"{name}_{v}.zarr"
         if a.force or not (dest / ".zattrs").exists():
-            def planes(v=v):
-                for z in range(nz):
-                    x = to_float(read_plane(n5, a.setup, z))
-                    if v == "sheared":
-                        yield to_u8(x)
-                    else:
-                        y0 = s * z + (off if s < 0 else 0.0)
-                        yield to_u8(shift_y(x, out_ny, y0))
+            if v == "sheared":
+                planes = (to_u8(to_float(read_plane(n5, a.setup, z)))
+                          for z in range(nz))
+            else:
+                planes = deskew_planes(
+                    lambda z: to_float(read_plane(n5, a.setup, z)),
+                    (nz, ny, nx), geometry)
             attrs = {**base, **spec["extra"], "axes": "ZYX",
                      "spacing_nm_zyx": spec["spacing"]}
             print(f"== {v}: {spec['shape']} spacing {spec['spacing']} nm")
-            zarr_writer.write_pyramid(dest, planes(), spec["shape"], spec["spacing"], attrs)
+            zarr_writer.write_pyramid(dest, planes, spec["shape"], spec["spacing"], attrs)
         else:
+            if v == "deskew":
+                check_existing_deskew(dest, s, calibration["z_spacing_um"])
             print(f"== {v}: already written {dest}")
         if a.upload:
             url = f"gs://{a.bucket}/{a.prefix}/{dataset_id}/image/{dest.name}"

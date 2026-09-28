@@ -1,175 +1,152 @@
-# De-shearing Janelia ASLM tiles (`janelia_n5.py`)
+# Janelia ASLM YZ deskew (`janelia_n5.py`)
 
-How [`janelia_n5.py`](janelia_n5.py) turns one tile of a Navigate / BigDataViewer
-N5 acquisition (Kevin Dean lab, `coding/data/janelia_aslm/`) into a de-sheared
-uint8 OME-Zarr pyramid. It covers the geometry, where each number comes from,
-what was checked, and what is still open.
+`janelia_n5.py` converts a Navigate / BigDataViewer N5 tile into uint8
+OME-Zarr pyramids. `_sheared` preserves the recorded camera planes. `_deskew`
+shifts those planes along Y, retaining the full tile without an extra rotation.
 
-## 1. Why the raw data is sheared
+## Geometry correction
 
-These are **stage-scan** acquisitions. The light sheet sits at 45° to the stage
-scan axis. Each camera frame is one oblique plane, and between frames the stage
-moves by a fixed step (`experiment.yml: MicroscopeState.step_size = 0.4 µm`).
+For `20260918_janelia_brain_big_stitch_488nm_22x/36x_001`, the metadata records:
 
-Stacked naively as (Z = frame index, Y, X), a structure that is compact in the
-sample does not stay at the same Y from frame to frame. It drifts by a constant
-amount per frame. In a raw Y–Z cross-section, compact objects appear as
-diagonal streaks.
+- 500 Z planes, 648 camera Y rows, and 2048 X columns.
+- A **mechanical stage step** of 0.4 um, with 0.168 um camera pixels.
+- Ordinary `z-stack` acquisition, `primary_z_axis=z`, `waveform_template=Default`,
+  and no focus displacement during the scan.
+- A YZ angle of 315 degrees, equivalent to -45 degrees, and rotation disabled.
+- XML plane-normal Z spacing of 0.282842712 um.
 
-De-shearing undoes that drift. It is a Y translation that grows linearly with
-the frame index.
+The corrected model projects the mechanical step into camera coordinates:
 
-## 2. The transform
-
-For source plane `z` (0-based) and source row `y`:
-
+```text
+dz = step * sin(abs(angle))          = 0.282842712 um
+dy = sign(angle) * step * cos(angle) = -0.282842712 um
+s  = dy / camera_pixel_y            = -1.683587574 pixels/plane
 ```
-y_out = y + a·z + offset        a      = shear, px per plane (negative here)
-                                offset = |a|·(nz − 1)   when a < 0, so y_out ≥ 0
-x_out = x
+
+This uses the stage-scan convention in PetaKit's `deskewFrame3D` and
+`XR_deskewRotateFrame`, without their optional rotation. The code checks that
+the projected Z spacing agrees with the XML. It rejects unsupported acquisition
+modes instead of silently applying this convention to an optical-step or
+constant-velocity scan.
+
+The XML Y coefficient, -2.380952, was computed from the **unprojected** 0.4 um
+step. Combining it with either the projected XML Z spacing or an unprojected
+0.4 um output Z spacing gives a different geometry. In particular, the previous
+ClearEx-style candidate used 0.4 um displacement along both Y and Z: a resultant
+step of 0.565685 um, not 0.4 um. The earlier shear-plus-rotation output also
+interpolated across camera planes and degraded XY. Neither is the default now.
+
+This interpretation is supported by the recorded acquisition mode and current
+Navigate/PetaKit implementations, but has **not** been calibrated against beads
+or a reference export from Kevin. It is not a claim of numerical equivalence to
+ClearEx: its Navigate adapter infers a stage-Y scan and changes the spacing used
+by its affine. Kevin's stage-axis mapping concerns tile placement metadata;
+this script still processes one tile, not a stitched stage-coordinate volume.
+
+## Resampling and coverage
+
+```text
 z_out = z
+y_out = y + s*z + offset
+x_out = x
+offset = max(0, -s*(nz-1))
+out_ny = ny + ceil(abs(s)*(nz-1))
 ```
 
-- The output height is `ny + ceil(|a|·(nz−1)) + 1`. For a 648-row, 500-plane
-  tile with `a = −2.380952`, that is **1838 rows**.
-- Each output plane depends on **one** source plane only. The transform is
-  therefore streamed plane by plane, and memory use does not grow with Z.
-- The fractional shift uses **linear interpolation** between the two nearest
-  output rows (`shift_y`). Output outside the tilted region is filled with 0.
-- The result is a parallelogram of data inside a zero-padded box. Plane 0 is
-  at the bottom (offset ≈ 1188 rows) and the last plane is at the top.
+Each output Z plane samples exactly one camera plane with linear Y interpolation.
+Partial edge support is normalized, so boundary rows do not become artificially
+dim. Bounds use `ceil` to retain fractional trailing coverage. The raw intensity
+mapping is applied before interpolation; rounding to uint8 happens once afterward.
+There is no background subtraction, deconvolution, or artificial tissue filling.
 
-Only a shear is applied: **no rotation** to the coverslip frame and no
-isotropic resampling. The output axes are the stage-scan frame described in
-§4.
+The full scan shifts by about 840 Y pixels, more than the 648-row camera height.
+Its measured support therefore remains a parallelogram inside a rectangular
+array. Black corners are expected with full-tile preservation; removing all of
+them would discard part of the scan. They are separate from distortion or blur
+**within** the measured tissue.
 
-## 3. Where `a` comes from (read, not chosen)
+## Metadata and verification
 
-The shear is read per tile from `CH00_000000.xml`, in the setup's
-`<ViewRegistration>`:
+Spacings are divided by the recorded 22x expansion factor. `36x` is the objective.
 
-```xml
-<ViewTransform type="affine" Name="Shearing Transform">
-  <affine>1 0 0 0   0 1 -2.380952 0   0 0 1 0</affine>
-</ViewTransform>
-```
+| group | shape (Z,Y,X), setup 0 | spacing (Z,Y,X), biological nm |
+|---|---|---|
+| `_sheared` | 500 x 648 x 2048 | 12.8565, 7.6364, 7.6364 |
+| `_deskew` | 500 x 1489 x 2048 | 12.8565, 7.6364, 7.6364 |
 
-- This affine is written row-major in (x, y, z) pixel coordinates.
-- Row y, column z holds `a = −2.380952`, which means `y' = y − 2.380952·z`.
-- The value is `−step / xy_px = −0.4 / 0.168`: the full stage step, expressed
-  in lateral pixels.
+Deskew metadata records the effective and XML coefficients, angle, projected
+spacing, offset, interpolation, and source-to-output pixel affine. An existing
+group with another method, coefficient, or Z spacing requires `--force`.
+`--shear-px-per-plane` overrides only the lateral shift, not the Z calibration.
 
-**ClearEx agrees.** Kevin's instruction was `shear_yz_deg = −45`. ClearEx
-builds its shear in physical µm as `y' = y + tan(θ)·z`, so θ = −45° gives a
-coefficient of −1. For a Navigate experiment with `BDVParameters.shear.shear_data: true`
-and `shear_dimension: YZ` (both set here), ClearEx treats the data as stage-scan
-and sets the scan-axis spacing to `scan_step / |coefficient| = 0.4 µm`.
+Tests simulate spherical objects acquired along an oblique mechanical stage path
+and verify recovered centroids, physical variances, and YZ covariance. They also
+cover angle signs, invalid calibration, stale outputs, and fractional edge support.
 
-- References:
-  - `clearex/shear/pipeline.py::_resolve_affine_voxel_size_um_zyx`
-  - `clearex/io/experiment.py::_infer_navigate_oblique_geometry`
-- The result is `−1 × 0.4 µm = −0.4 µm = −2.381 px` per plane, the same as the
-  XML value.
-
-So the acquisition software's XML and the lab's own processing tool describe
-the same transform. The script uses the XML value directly.
-
-### The value we did not use
-
-A PetaKit5D-style stage-scan deskew would use `step·cos45° / xy_px = 1.684 px`
-per plane, with plane spacing `step·sin45° = 0.2828 µm`. That 0.2828 µm is the
-`voxelSize` z the XML itself lists. The two conventions describe different
-frames: plane-normal spacing versus stage-step spacing. We followed Kevin's
-tools, which agree with each other.
-
-### Empirical check (inconclusive)
-
-The shift per plane was measured directly by phase-correlating frame `z`
-against frame `z+k`, after two steps:
-
-- subtracting the per-pixel z-median, which removes camera fixed-pattern noise;
-- band-pass filtering the frames.
-
-Results were a median of **1.88–2.07 px per plane** (tiles 0 and 20,
-k = 4–16). That lies between 1.684 and 2.381, so it does not decide between
-them. Oriented tissue (fibres) biases the estimator. The sign agrees with the
-XML: content moves to larger Y as z increases, so the de-shear subtracts `|a|·z`.
-
-Visually, the de-sheared Y–Z cross-section turns the diagonal streaks into
-compact, rounded structures. Confirming the magnitude properly needs a bead
-or point-source acquisition, or a check with Kevin.
-
-## 4. Voxel spacing written to `.zattrs`
-
-Spacings are divided by the expansion factor, which is parsed from
-`experiment.yml: Saving.label_488nm` (`"22x"` → 22). The `36x` in the folder
-names is the objective, not the expansion.
-
-| group | shape (Z,Y,X), tile 0 | z | y, x | meaning of z |
-|---|---|---|---|---|
-| `_sheared` | 500 × 648 × 2048 | 0.2828 µm / 22 = 12.86 nm | 0.168 µm / 22 = 7.64 nm | XML voxel z (plane-normal spacing); **not** a rectilinear volume |
-| `_deskew` | 500 × 1838 × 2048 | 0.4 µm / 22 = 18.18 nm | 7.64 nm | stage step, matching the XML/ClearEx frame |
-
-`spacing_basis: biological` and `fold_source: experiment.yml:Saving.label_488nm`
-are recorded, along with:
-
-- `xml_shear_px_per_plane`;
-- `stage_step_um`;
-- the tile's `grid_translation_xyz_px`, for later stitching;
-- a `deskew` block with `shear_px_per_plane`, `offset_px`, `interp` and `fill`.
-
-## 5. Order relative to intensity normalization
-
-```
-raw uint16 frame ──► fit/apply intensity map ──► float 0–255 ─┬─► rint → uint8 → _sheared
-                                                               └─► shift_y → rint → uint8 → _deskew
-```
-
-- **The intensity map is fitted on raw frames.** The default is `gat`: the
-  noise-model Anscombe transform from `connectomics/data/normalization/anscombe.py`,
-  loaded by file path in the same way `nd2_source.py` does. The fit uses 16
-  evenly spaced *raw* frames, because the shot-noise model
-  `var = gain·(x − offset)` holds in acquisition geometry. Interpolation would
-  mix neighbouring pixels and shrink the variance.
-- **The de-shear resamples the pre-rounding float.** Rounding happens once, so
-  `_deskew` is a pure geometric resample of `_sheared` and carries the same
-  intensity mapping.
-
-## 6. Output and publishing
-
-Both groups use `zarr_writer.write_pyramid`, the same layout as the
-`liconn/moe` groups: zarr v2, 128³ chunks, blosc/zstd, and a 5-level pyramid
-with floor halving. They are published to:
-
-```
-gs://donglai_public/liconn/janelia/<date_dataset>_<acq>/image/<name>_setupNN_{sheared,deskew}.zarr
-```
-
-`--upload` runs `gcloud storage rsync --delete-unmatched-destination-objects`
-with the throttled settings from `ingest.py`, then runs the completeness check.
-
-**Known false alarm.** zarr does not write chunks that equal the fill value, so
-the empty corners of `_deskew` never exist as objects. `remote_group_complete`
-expects every chunk, and it reports tile 0 as `649/1121 BAD`. Compare local
-and remote object counts instead; for tile 0 they match exactly.
-
-## 7. What this does not do
-
-- **Stitching.** Each tile is de-sheared independently. Tile placement lives in
-  the XML "Translation to Regular Grid" transform, which is recorded, and in
-  `multi_positions.yml`. Neither is applied yet.
-- **Rotation to the coverslip frame.** ClearEx's `auto_rotate_from_shear` would
-  rotate by −atan(shear). It is off here, and off by default in ClearEx too.
-- **Integer-pixel shortcut.** Kevin plans to make the shear an integer number
-  of pixels in future acquisitions. When that happens, `shift_y` reduces to a
-  pure translation with no interpolation.
+For visual checks, read **the actual resampled output**, compare corresponding
+source points, use the recorded physical spacing, and keep intensity limits fixed.
+Do not stretch orthogonal panels with `aspect="auto"`. Directly inverse-mapping
+raw data to a display grid interpolates along the oblique raw Z direction and can
+create diagonal fine streaks absent from the native deskewed grid. Neither such
+previews nor apparent roundness of tissue alone is a geometry calibration.
 
 ## Usage
 
 ```bash
-python tutorials/liconn_ingest/janelia_n5.py \
-    <data>/janelia_aslm/20260918_janelia_brain_big_stitch_488nm_22x/36x_001 \
-    --setup 0 --work <data>/janelia_aslm_work \
-    [--only deskew] [--intensity-mode gat|linear] [--noise-model GAIN OFFSET] \
-    [--force] [--upload]
+conda run -n pytc python tutorials/liconn_ingest/janelia_n5.py \
+  /data/donglai/liconn/janelia_aslm/raw/20260918_janelia_brain_big_stitch_488nm_22x/36x_001 \
+  --setup 0 --work /data/donglai/liconn/janelia_aslm/processed \
+  --only deskew --force
+
+conda run -n pytc python tutorials/liconn_ingest/run_tests.py
 ```
+
+`--only deskew` leaves `_sheared.zarr` untouched. Without `--upload`, processing
+stays local. Reload an existing viewer layer after replacing its Zarr group:
+the new shape and spatial metadata differ from the old export.
+
+## Batch processing with Slurm
+
+`janelia_batch.py plan` discovers XML setups, validates their calibration and
+N5 plane files, and writes a fixed task manifest. Metadata-only N5 setup
+placeholders are ignored. The current raw directory contains 16 acquisitions
+and 166 populated setups. Each task writes both `_sheared` and `_deskew`, reusing
+existing compatible groups without `--force` or uploading anything.
+
+On `cajal`, the sole partition is `gpu`, but these jobs request **no GPU**.
+Use 4 CPUs and 16 GB per task, with eight concurrent tasks. Codec and numerical
+thread pools are limited to avoid oversubscription. For example, from the repo:
+
+```bash
+RUN=/data/donglai/liconn/janelia_aslm/processed/_slurm/$(date -u +%Y%m%dT%H%M%SZ)
+conda run -n pytc python tutorials/liconn_ingest/janelia_batch.py plan \
+  --raw /data/donglai/liconn/janelia_aslm/raw \
+  --work /data/donglai/liconn/janelia_aslm/processed --manifest "$RUN/tasks.json"
+mkdir -p "$RUN/logs"
+# Use the manifest task count minus one for the upper array index.
+JOB=$(sbatch --parsable --array=0-165%8 \
+  --output="$RUN/logs/%A_%a.out" --error="$RUN/logs/%A_%a.err" \
+  tutorials/liconn_ingest/slurm/janelia_ingest.sbatch "$RUN" "$PWD")
+sbatch --dependency="afterany:$JOB" --job-name=janelia_verify \
+  --cpus-per-task=1 --mem=2G --time=00:10:00 \
+  --output="$RUN/logs/verify_%j.out" --error="$RUN/logs/verify_%j.err" \
+  tutorials/liconn_ingest/slurm/janelia_ingest.sbatch "$RUN" "$PWD" verify
+```
+
+Do not submit overlapping arrays against the same output groups. Supply a saved
+source tree as `CODE_ROOT` (the second script argument) to isolate a run from
+subsequent code edits; the submitted September 28 run does this under `RUN/code`.
+
+Per-task records persist in `RUN/status/<index>.json`, including failures and
+Slurm job IDs. The `afterany` verification job runs even if conversion fails,
+checks both outputs' level-0 shape, dtype, spacing, and deskew calibration, and
+writes `RUN/summary.json`. A successful summary has `ok: true`. This is important
+on this host because Slurm accounting is disabled. Verification checks metadata
+and normal worker completion, not an exhaustive read of every output chunk.
+
+## References
+
+- [PetaKit deskewFrame3D](https://github.com/abcucberkeley/PetaKit5D/blob/f7dbfd5cc5947a32e6028a6c7b895ff0b891c673/pointDetection/llsmtools/transforms/deskewFrame3D.m): lateral stage projection and full-volume bounds.
+- [PetaKit XR_deskewRotateFrame](https://github.com/abcucberkeley/PetaKit5D/blob/f7dbfd5cc5947a32e6028a6c7b895ff0b891c673/microscopeDataProcessing/deskew_rotate/XR_deskewRotateFrame.m): projected axial spacing.
+- [Navigate](https://github.com/TheDeanLab/navigate): `src/navigate/model/features/common_features.py` stage stepping and `src/navigate/model/metadata_sources/bdv_metadata.py` XML generation.
+- [ClearEx](https://github.com/TheDeanLab/clearex): `src/clearex/io/experiment.py` Navigate geometry inference and `src/clearex/shear/pipeline.py` affine spacing, bounds, and support normalization.
