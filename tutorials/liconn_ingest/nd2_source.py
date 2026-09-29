@@ -70,6 +70,24 @@ def load_normalization_package():
     return mod
 
 
+def load_anscombe_module():
+    """Load the legacy Anscombe (gat) mapping by path, for `janelia_n5.py` only.
+
+    ND2 ingest uses the aligned codec (`load_normalization_package`). Janelia
+    N5 keeps `gat` until its sources are confirmed raw (not denoised, clipped
+    or resampled) and it is ported to the aligned path.
+    """
+    for path in _NORMALIZATION_CANDIDATES:
+        if (path / "anscombe.py").exists():
+            break
+    else:
+        raise FileNotFoundError(f"anscombe.py not found in {_NORMALIZATION_CANDIDATES}")
+    spec = importlib.util.spec_from_file_location("_liconn_anscombe", path / "anscombe.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def load_preprocess_module():
     """Load `scripts/preprocess_liconn.py` without importing `connectomics`.
 
