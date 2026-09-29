@@ -87,35 +87,34 @@ def test_fixed_intensity_swaps_only_the_clip_keys():
     assert "clip_percentiles" not in attrs
 
 
-GAT_MAPPING = {"gain": 6.5, "offset": 141.7, "noise_model_source": "estimated",
-               "stretch_percentiles": [1.0, 99.9], "stretch_range": [4.34, 16.67],
-               "stats_z_indices": [0, 39, 78]}
+ALIGNED_ATTRS = {"intensity_mode": "aligned", "noise_gain": 6.5, "noise_offset": 141.7,
+                 "tissue_median_signal": 115.9, "codec": "sqrt_aligned_u8_v1",
+                 "neuroglancer_shader": "void main() {}"}
 
 
-def test_gat_records_the_mapping_instead_of_clip_and_clahe_keys():
+def test_aligned_records_intensity_attrs_instead_of_clip_and_clahe_keys():
     attrs = zw.provenance_attrs(
         source="x.nd2", source_channel=0, source_shape_zyx=(1, 1, 1),
-        spacing_nm_zyx=(1, 1, 1), clip_mode="gat", clip_values=(1.0, 99.9),
-        clip_limit=None, mapping=GAT_MAPPING)
-    assert attrs["intensity_mode"] == "gat"
-    assert attrs["noise_gain"] == 6.5 and attrs["noise_offset"] == 141.7
-    assert attrs["stretch_range_anscombe"] == [4.34, 16.67]
-    assert abs(attrs["noise_sigma_uint8_levels"] - 255.0 / (16.67 - 4.34)) < 1e-9
+        spacing_nm_zyx=(1, 1, 1), clip_mode="aligned", clip_values=None,
+        clip_limit=None, intensity_attrs=ALIGNED_ATTRS)
+    for key, value in ALIGNED_ATTRS.items():
+        assert attrs[key] == value
+    assert attrs["downsample_method"] == "aligned_intensity_volume_average"
     for legacy in ("clip_mode", "clip_percentiles", "clip_intensity_range",
                    "clahe_clip_limit"):
         assert legacy not in attrs
     json.dumps(attrs)                               # .zattrs must serialise
 
 
-def test_gat_without_its_mapping_is_refused():
+def test_aligned_without_its_intensity_attrs_is_refused():
     try:
         zw.provenance_attrs(source="x", source_channel=0, source_shape_zyx=(1, 1, 1),
-                            spacing_nm_zyx=(1, 1, 1), clip_mode="gat",
-                            clip_values=(1.0, 99.9), clip_limit=None)
+                            spacing_nm_zyx=(1, 1, 1), clip_mode="aligned",
+                            clip_values=None, clip_limit=None)
     except ValueError as e:
-        assert "mapping" in str(e)
+        assert "intensity_attrs" in str(e)
     else:
-        raise AssertionError("expected ValueError for gat without a mapping")
+        raise AssertionError("expected ValueError for aligned without intensity_attrs")
 
 
 def test_write_pyramid_reproduces_the_published_metadata():

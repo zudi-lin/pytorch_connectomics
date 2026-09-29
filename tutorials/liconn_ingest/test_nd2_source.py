@@ -95,41 +95,51 @@ def test_flat_plane_returns_zeros_not_an_error():
 
 
 def _shot_noise_volume(seed=0, gain=6.0, offset=140.0, shape=(4, 256, 256)):
+    """Poisson photons on a blob pattern, with a smooth vignette, camera-scaled."""
     rng = np.random.default_rng(seed)
     z, y, x = np.meshgrid(*(np.arange(n) for n in shape), indexing="ij")
-    photons = 5.0 + 60.0 * (0.5 + 0.5 * np.sin(y / 17.0) * np.cos(x / 23.0 + z))
+    vignette = 1.0 - 0.4 * (((y - shape[1] / 2) / shape[1]) ** 2
+                            + ((x - shape[2] / 2) / shape[2]) ** 2) * 4
+    photons = vignette * (8.0 + 40.0 * (0.5 + 0.5 * np.sin(y / 9.0) * np.cos(x / 13.0 + z)))
     return (gain * rng.poisson(photons) + offset).astype(np.uint16)
 
 
-def test_anscombe_module_loads_without_connectomics():
-    """The gat pixel math must be the repo's module, loaded by path."""
-    ans = ns.load_anscombe_module()
-    assert "connectomics" not in ans.__name__
-    for name in ("fit_anscombe_mapping", "anscombe_to_uint8", "estimate_noise_model"):
-        assert hasattr(ans, name)
+def test_normalization_package_loads_without_connectomics():
+    """The aligned pixel math must be the repo's package, loaded by path."""
+    norm = ns.load_normalization_package()
+    assert "connectomics" not in norm.__name__
+    for name in ("fit_alignment", "to_aligned", "encode_aligned", "decode_aligned",
+                 "alignment_attrs", "neuroglancer_shader"):
+        assert hasattr(norm, name)
 
 
-def test_gat_mapper_is_one_volume_function_regardless_of_plane_order():
+def test_aligned_mapper_is_one_volume_function_regardless_of_plane_order():
     """Streaming is only equivalent to a whole-volume pass if a plane's output
-    depends on the plane and the volume mapping, never on neighbouring planes."""
-    ans = ns.load_anscombe_module()
+    depends on the plane and the volume alignment, never on neighbouring planes."""
+    norm = ns.load_normalization_package()
     volume = _shot_noise_volume()
-    mapping = ns.anscombe_mapping_json(ans.fit_anscombe_mapping(
-        volume, stats_planes=4, stretch_percentiles=(1.0, 99.9)))
-    to_uint8 = ns.plane_mapper("gat", (1.0, 99.9), None, mapping)
+    alignment = norm.fit_alignment(volume, stats_planes=4)
+    to_uint8 = ns.plane_mapper("aligned", None, None, alignment)
     forward = [to_uint8(p) for p in volume]
     backward = [to_uint8(p) for p in volume[::-1]][::-1]
     for a, b in zip(forward, backward):
         assert a.dtype == np.uint8 and np.array_equal(a, b)
-    stacked = np.stack(forward)
-    assert stacked.min() == 0 and stacked.max() == 255
 
 
-def test_gat_mapper_refuses_clahe_and_a_missing_mapping():
-    for kwargs in ({"clip_limit": 0.03, "mapping": {"gain": 1.0}},
-                   {"clip_limit": None, "mapping": None}):
+def test_aligned_block_average_averages_in_aligned_units():
+    norm = ns.load_normalization_package()
+    codes = np.random.default_rng(1).integers(0, 256, size=(4, 8, 8)).astype(np.uint8)
+    out = ns.aligned_block_average(codes)
+    expected = norm.encode_aligned(
+        norm.decode_aligned(codes).reshape(2, 2, 4, 2, 4, 2).mean(axis=(1, 3, 5)))
+    assert out.dtype == np.uint8 and np.array_equal(out, expected)
+
+
+def test_aligned_mapper_refuses_clahe_and_a_missing_alignment():
+    for kwargs in ({"clip_limit": 0.03, "alignment": {"offset": 1.0}},
+                   {"clip_limit": None, "alignment": None}):
         try:
-            ns.plane_mapper("gat", (1.0, 99.9), **kwargs)
+            ns.plane_mapper("aligned", None, **kwargs)
         except ValueError:
             pass
         else:

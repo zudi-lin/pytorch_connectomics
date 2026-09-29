@@ -41,9 +41,9 @@ RUN python -m pip install --no-cache-dir \
 WORKDIR /workspace
 COPY tutorials/liconn_ingest /workspace/tutorials/liconn_ingest
 COPY scripts/preprocess_liconn.py /workspace/scripts/preprocess_liconn.py
-# The gat intensity path, loaded by file path so the image needs no torch/MONAI.
-COPY connectomics/data/normalization/anscombe.py \
-     /workspace/connectomics/data/normalization/anscombe.py
+# The aligned intensity path (fit, code table, display), loaded by path so the
+# image needs no torch/MONAI.
+COPY connectomics/data/normalization /workspace/connectomics/data/normalization
 
 # Import smoke test: proves the wheels brought their own shared libraries,
 # since there is no apt layer to supply them.

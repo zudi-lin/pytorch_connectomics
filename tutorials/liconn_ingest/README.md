@@ -63,12 +63,12 @@ python tutorials/liconn_ingest/ingest.py inspect ./inbox/ExPID71_120ms-30ms_600n
 # 3. the whole drop: fetch each raw, convert, publish, verify, delete.
 #    Skips anything already in the bucket, so an interrupted run resumes free.
 python tutorials/liconn_ingest/ingest.py --inbox ./inbox --work ./work \
-    run --clip-variant gat_1_99.9 --docker --prune
+    run --clip-variant aligned_v1 --docker --prune
 # --clip-variant, --work, --inbox and the bucket may instead come from data.yaml
 
 # a specimen with no expansion fold anywhere, and two exposures per file
 python tutorials/liconn_ingest/ingest.py --inbox ./expid71_snr --work ./work71snr \
-    run --clip-variant gat_1_99.9 --fold-unknown --split-exposures \
+    run --clip-variant aligned_v1 --fold-unknown --split-exposures \
         --docker --prune
 ```
 
@@ -80,7 +80,7 @@ Single steps are there when you need them:
 
 ```bash
 python tutorials/liconn_ingest/ingest.py --work ./work preprocess \
-    ./inbox/ExPID99_32x_1.nd2 --clip-variant gat_1_99.9 \
+    ./inbox/ExPID99_32x_1.nd2 --clip-variant aligned_v1 \
     --drop-slug cerebellum --docker
 python tutorials/liconn_ingest/ingest.py --work ./work publish ExPID99_32x_1_cerebellum
 python tutorials/liconn_ingest/ingest.py --work ./work verify  ExPID99_32x_1_cerebellum
@@ -134,36 +134,65 @@ Run **one volume at a time**. Four concurrent CLAHE streams oversubscribed 8
 cores and, worse, streamed ~200 GB through the page cache, evicting everything
 interactive. `nice` does not help with that — only concurrency does.
 
-## Intensity: `gat` by default, legacy clip + CLAHE on request
+## Intensity: `aligned` by default, legacy clip + CLAHE on request
 
-`--clip-mode gat` (the default) maps raw to uint8 with **one function per
-volume**: fit the shot-noise model `variance = gain · (x − offset)` on 16 evenly
-spaced planes, apply the generalized Anscombe transform (≈ unit noise at every
-brightness), and stretch the transformed 1st / 99.9th percentiles to 0 / 255.
-No CLAHE. The math is `connectomics/data/normalization/anscombe.py`, loaded by
-path (`nd2_source.load_anscombe_module`) so the image still carries no torch.
-`.zattrs` records `intensity_mode: gat`, the fitted gain and offset, the stretch
-and `noise_sigma_uint8_levels` in place of the clip/CLAHE keys, and
-`provenance.json` keeps the same mapping under `intensity_mapping`.
+**One uint8 copy serves both deep learning and the browser.** `--clip-mode
+aligned` (the default) does the only per-volume step, alignment to a shared
+profile, then stores through a table that is the same for every volume:
 
+1. **Align** (per volume, fitted on 16 evenly spaced planes):
+   `r = (x − offset) / (flat_field(y, x) · tissue_median)`. The offset and gain
+   come from the shot-noise fit `variance = gain · (x − offset)`; the flat field
+   is an exp-quadratic fitted to per-block tissue medians (vignetting); the
+   tissue median uses every pixel of the tissue blocks (block median ≥ 3
+   standard errors above the offset), so empty or resin regions do not move it
+   and dim acquisitions keep all their tissue. `r` is 0 at no light and 1 at typical tissue, for
+   any microscope, gain, exposure or labeling brightness.
+2. **Store** `r` through the fixed code table
+   `code = 255 · (√(clip(r, 0, 32) + 0.25) − 0.5) / (√32.25 − 0.5)`, where the
+   square root follows the shot noise. A code means the same aligned intensity
+   in every volume. r below 0 (under the fitted offset) becomes code 0; the
+   fraction is logged and stored as `codec_qa_clipped_low`.
+3. **Train** on decoded `r` with `data.image_transform.normalize: aligned-u8`,
+   which decodes the table before any resize and computes no per-patch
+   statistics (clip percentiles must stay 0 / 1). Per-patch min-max or z-score
+   would undo the alignment. The rest of the nonlinearity
+   is the model's job.
+4. **View** the same codes through the fixed shader in `.zattrs`
+   (`neuroglancer_shader`): black at r = 0.75, white at r = 4.5, γ = 1.5, so
+   noise sits near black and the bright puncta stand out. No second copy and
+   no histogram equalization.
+
+Pyramid levels average in aligned units and re-encode
+(`nd2_source.aligned_block_average`); averaging the square-root codes directly
+would bias every coarser level low. `.zattrs` records the fit (offset, gain,
+tissue median and tissue rule, tissue fraction, flat-field coefficients,
+codec QA), the code table and the display. `provenance.json` keeps the
+full fit under `alignment` and the `.zattrs` keys under `intensity_attrs`, so
+`refold` can regenerate them without numpy. `--no-flat-field` skips the
+vignetting correction.
+
+Step-by-step walkthrough with figures:
+[`../liconn_preprocess/README.md`](../liconn_preprocess/README.md).
 Why it replaced the legacy recipe (evidence and figures in the Google Doc
-"LICONN intensity normalization", 2026-09-27): on ExPID96 the fixed 120–350 clip
-saturated 7.9% of pixels, the synapse/vesicle tail; per-plane p99 still
-flattens puncta peaks; and CLAHE raises sharpness at the defocused tile border
-to match the center by amplifying noise. On the full ExPID96 ND2 the fit gives
-gain 6.49, offset 140.5, and noise σ ≈ 21 uint8 levels.
+"LICONN intensity normalization"): on ExPID96 the fixed 120–350 clip saturated
+7.9% of pixels, the synapse/vesicle tail; per-plane p99 still flattens puncta
+peaks; CLAHE raises sharpness at the defocused tile border to match the center
+by amplifying noise; and per-plane statistics leave every volume on its own
+scale.
 
-**gat groups publish under `<expid>/image_gat/`, not `<expid>/image/`.** Names do
-not carry the recipe, so a shared folder would let `run` skip a gat conversion
-as "already published" and let `publish` overwrite the clip+CLAHE group that
-`neuron_liconn_moe` reads. `check <expid> --image-dir image_gat` audits them. A
-work directory that already holds the other recipe's conversion is refused
-unless you pass `--force` or use a separate `--work`.
+**Aligned groups publish under `<expid>/image_aligned/`, not `<expid>/image/`.**
+Names do not carry the recipe, so a shared folder would let `run` skip an
+aligned conversion as "already published" and let `publish` overwrite the
+clip+CLAHE group that `neuron_liconn_moe` reads. `check <expid> --image-dir
+image_aligned` audits them. A work directory that already holds the other
+recipe's conversion is refused unless you pass `--force` or use a separate
+`--work`.
 
 `--clip-mode percentile|fixed_intensity` reproduces the legacy published recipe
 (per-plane clip, CLAHE with `--clip-limit`, default 0.03) and its exact
-`.zattrs` key set. `--clip-limit` is refused with `gat`, including a
-`clip_limit` left in `data.yaml`.
+`.zattrs` key set. `clip_values` and `clip_limit` are refused with `aligned`,
+including when left in `data.yaml`.
 
 ## The published layout is read, not chosen
 
@@ -185,10 +214,10 @@ off the published set. The previous revision of `ingest.py` wrote to
 ## Four things this tool will not do for you
 
 **`--clip-variant` has no default.** It labels the intensity recipe in
-provenance (e.g. `gat_1_99.9`). Every group under `image/` is
+provenance (e.g. `aligned_v1`). Every group under `image/` is
 `clip_mode=percentile, clip_percentiles=[1,99]` plus CLAHE, while
 `lessons/liconn_preprocessing.md` calls fixed `120–350` the reference recipe;
-new conversions default to `gat` (see above).
+new conversions default to `aligned` (see above).
 
 **It will not invent an expansion fold.** No fold in the stem and no `--fold`
 means `preprocess` refuses. The fold is not in the ND2 either — searched
@@ -219,20 +248,20 @@ A 1199×2304×2304 uint16 ND2 is 12.7 GB and the driving host has ~24 GB free.
 Level 0 is written one 128-plane chunk row at a time and each reduction reads
 the level below off disk, so peak memory is a couple of chunk rows and does not
 scale with Z. This is only equivalent to a whole-volume read because no
-plane's output depends on another plane. `gat` fits its one volume-wide
-mapping from sampled planes **before** streaming starts; the legacy modes compute
+plane's output depends on another plane. `aligned` fits its one volume-wide
+alignment from sampled planes **before** streaming starts; the legacy modes compute
 their percentiles per plane. `test_nd2_source.py` pins both, since a statistic
 that drifted during streaming would silently change the pixels.
 
-The pixel math is the repo's, not a copy: `nd2_source.load_anscombe_module`
-loads `connectomics/data/normalization/anscombe.py` by path, and
+The pixel math is the repo's, not a copy: `nd2_source.load_normalization_package`
+loads `connectomics/data/normalization/` by path, and
 `nd2_source.load_preprocess_module` loads `scripts/preprocess_liconn.py` behind a
 stub for its one package-level import. The image stays free of torch and MONAI
 without forking the pixel path.
 
 ## What is verified
 
-- **57/57 tests pass** (host run, 2026-09-27; the image build re-runs them), and they gate the build
+- **58/58 tests pass** (host run, 2026-09-28; the image build re-runs them), and they gate the build
   (`python tutorials/liconn_ingest/run_tests.py`; the numpy-dependent modules
   skip loudly on a bare host).
 - `write_pyramid` end to end on a synthetic 37×40×40 volume: level 0 comes

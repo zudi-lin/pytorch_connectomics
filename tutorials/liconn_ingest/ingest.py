@@ -33,11 +33,13 @@ CLIP VARIANT IS REQUIRED, NOT DEFAULTED. It is the provenance label for the
 intensity recipe. The published set under `image/` is all
 `clip_mode=percentile, clip_percentiles=[1,99]` plus CLAHE.
 
-INTENSITY DEFAULT IS `gat`. One noise model and one stretch per volume
-(`connectomics/data/normalization/anscombe.py`), no CLAHE: the percentile clip
-saturated the synapse/vesicle tail and CLAHE hid defocus at the tile border.
-gat groups publish under `<expid>/image_gat/` so they can never overwrite, or be
-skipped in favour of, the legacy groups under `<expid>/image/` that
+INTENSITY DEFAULT IS `aligned`. One stored uint8 copy serves both deep
+learning and browser viewing: each volume is aligned to a shared profile
+(0 = no light, 1 = tissue median, flat field divided out) and stored through a
+fixed code table, `connectomics/data/normalization/`. Training decodes it with
+`normalize: aligned-u8`; browsers use the fixed shader in `.zattrs`. Aligned
+groups publish under `<expid>/image_aligned/` so they can never overwrite, or be
+skipped in favour of, the legacy clip+CLAHE groups under `<expid>/image/` that
 `neuron_liconn_moe` reads. `--clip-mode percentile|fixed_intensity` reproduces
 the legacy recipe.
 """
@@ -177,8 +179,8 @@ def published_name(stem: str, drop_slug: str | None = None, drive_id: str | None
 
 
 def image_dir(clip_mode: str) -> str:
-    """`image` holds the legacy clip+CLAHE groups; gat groups get their own folder."""
-    return "image_gat" if clip_mode == "gat" else "image"
+    """`image` holds the legacy clip+CLAHE groups; aligned groups get their own folder."""
+    return "image_aligned" if clip_mode == "aligned" else "image"
 
 
 def gcs_dest(bucket: str, prefix: str, stem: str, name: str,
@@ -276,10 +278,13 @@ def _docker_preprocess(a) -> None:
     name = a.name or published_name(naming.parse_stem(nd2.name).stem, a.drop_slug)
     argv = ["--work", str(work), "preprocess", str(nd2), "--name", name,
             "--clip-variant", a.clip_variant, "--clip-mode", a.clip_mode,
-            "--clip-values", *[str(v) for v in a.clip_values],
             "--channel", str(a.channel), "--levels", str(a.levels)]
+    if a.clip_values is not None:
+        argv += ["--clip-values", *[str(v) for v in a.clip_values]]
     if a.clip_limit is not None:
         argv += ["--clip-limit", str(a.clip_limit)]
+    if not getattr(a, "flat_field", True):
+        argv.append("--no-flat-field")
     if a.fold is not None:
         argv += ["--fold", str(a.fold)]
     if a.fold_unknown:
@@ -359,26 +364,33 @@ def cmd_preprocess(a):
         print(f"  NOTE: fold {fold} is ASSUMED, not recorded anywhere in the data. "
               "Spacing is biological and comparable, but rests on that assumption.")
 
-    mapping = None
-    if a.clip_mode == "gat":
+    alignment = intensity = reduce_block = None
+    if a.clip_mode == "aligned":
         # One pass over sampled planes BEFORE streaming, so every plane gets the
         # same pointwise mapping and the streamed result equals a whole-volume one.
-        mapping = nd2_source.fit_anscombe(src, channel=a.channel,
-                                          stretch_percentiles=a.clip_values)
-        low, high = mapping["stretch_range"]
-        print(f"  gat: variance = {mapping['gain']:.3f} * (x - {mapping['offset']:.1f}); "
-              f"transformed [{low:.2f}, {high:.2f}] -> [0, 255]; "
-              f"noise sigma = {255.0 / (high - low):.1f} uint8 levels")
+        alignment = nd2_source.fit_alignment(src, channel=a.channel,
+                                             flat_field=getattr(a, "flat_field", True))
+        intensity = nd2_source.intensity_attrs(alignment)
+        reduce_block = nd2_source.aligned_block_average
+        flat = alignment["flat_field"]
+        print(f"  aligned: offset {alignment['offset']:.1f}, gain {alignment['gain']:.3f}, "
+              f"tissue median {alignment['tissue_median_over_gain']:.1f} x gain "
+              f"({100 * alignment['tissue_fraction']:.0f}% tissue), flat field "
+              f"{'on' if flat else 'off'}")
+        qa = alignment["codec_qa"]
+        print(f"  codec QA: below offset {100 * qa['clipped_low']:.2f}%, above r_max "
+              f"{100 * qa['clipped_high']:.3f}%, round-trip "
+              f"{qa['rms_error_over_noise']:.3f} x noise SD")
     planes = nd2_source.iter_planes(src, channel=a.channel, clip_mode=a.clip_mode,
                                     clip_values=a.clip_values, clip_limit=a.clip_limit,
-                                    mapping=mapping)
+                                    alignment=alignment)
     attrs = zarr_writer.provenance_attrs(
         source=str(src), source_channel=a.channel, source_shape_zyx=shape,
         spacing_nm_zyx=spacing, clip_mode=a.clip_mode, clip_values=a.clip_values,
-        clip_limit=a.clip_limit, spacing_basis=basis, mapping=mapping)
+        clip_limit=a.clip_limit, spacing_basis=basis, intensity_attrs=intensity)
     dest = work / f"{name}.zarr"
     written = zarr_writer.write_pyramid(dest, planes, shape, spacing, attrs,
-                                        levels=a.levels)
+                                        levels=a.levels, reduce_block=reduce_block)
 
     _write_prov(work, {
         "name": name,
@@ -407,9 +419,10 @@ def cmd_preprocess(a):
         "level_shapes": written["shapes"],
         "clip_variant": a.clip_variant,
         "clip_mode": a.clip_mode,
-        "clip_values": list(a.clip_values),
+        "clip_values": list(a.clip_values) if a.clip_values is not None else None,
         "clip_limit": a.clip_limit,
-        "intensity_mapping": mapping,
+        "alignment": alignment,
+        "intensity_attrs": intensity,
         "channel": a.channel,
         "channel_name": getattr(a, "channel_name", None),
         "exposure_ms": exposure_ms,
@@ -710,7 +723,7 @@ def cmd_refold(a):
         clip_mode=prov.get("clip_mode", "percentile"),
         clip_values=prov.get("clip_values", [1.0, 99.0]),
         clip_limit=prov.get("clip_limit", 0.03),
-        spacing_basis=basis, mapping=prov.get("intensity_mapping"))
+        spacing_basis=basis, intensity_attrs=prov.get("intensity_attrs"))
     attrs["multiscales"] = zarr_writer.ome_multiscales(shapes, spacing, f"{a.name}.zarr")
 
     old_scale = before["multiscales"][0]["datasets"][0]["coordinateTransformations"][0]["scale"]
@@ -890,22 +903,23 @@ def cmd_run(a):
 
 def _add_preprocess_args(p):
     p.add_argument("--clip-variant", default=None,
-                   help="Load-bearing provenance label, e.g. gat_1_99.9, "
+                   help="Load-bearing provenance label, e.g. aligned_v1, "
                         "clip_percentile_1_99 or clip_fixed_120_350. No default on "
                         "purpose; set it here or in data.yaml.")
-    p.add_argument("--clip-mode", choices=("gat", "percentile", "fixed_intensity"),
+    p.add_argument("--clip-mode", choices=("aligned", "percentile", "fixed_intensity"),
                    default=None,
-                   help="gat: per-volume noise-model Anscombe transform stretched to "
-                        "0-255, no CLAHE (published under image_gat/). percentile / "
-                        "fixed_intensity: legacy per-plane clip + CLAHE (image/). "
-                        "default: data.yaml:clip_mode, else gat")
+                   help="aligned: per-volume alignment to the shared profile, fixed "
+                        "uint8 code table, no CLAHE (published under image_aligned/). "
+                        "percentile / fixed_intensity: legacy per-plane clip + CLAHE "
+                        "(image/). default: data.yaml:clip_mode, else aligned")
     p.add_argument("--clip-values", type=float, nargs=2, default=None,
-                   help="gat: transformed-intensity percentiles mapped to 0/255 "
-                        "(default 1 99.9). percentile: per-plane percentiles (default "
+                   help="Legacy modes only. percentile: per-plane percentiles (default "
                         "1 99). fixed_intensity: raw range. default: data.yaml:clip_values")
     p.add_argument("--clip-limit", type=float, default=None,
                    help="CLAHE clip limit for the legacy modes (default 0.03); "
-                        "refused with gat.")
+                        "refused with aligned.")
+    p.add_argument("--no-flat-field", dest="flat_field", action="store_false",
+                   help="aligned: skip the illumination (vignetting) correction.")
     p.add_argument("--channel", type=int, default=None)
     p.add_argument("--exposure-ms", type=int, default=None,
                    help="Suffixes the name as <stem>_eNNN. From ND2 metadata, NEVER "
@@ -973,8 +987,8 @@ def main():
 
     ck = sub.add_parser("check", help="audit published groups for completeness")
     ck.add_argument("target", help="an expid (e.g. expid96) or a full gs:// prefix")
-    ck.add_argument("--image-dir", choices=("image", "image_gat"), default="image",
-                    help="legacy clip+CLAHE groups (image) or gat groups (image_gat)")
+    ck.add_argument("--image-dir", choices=("image", "image_aligned"), default="image",
+                    help="legacy clip+CLAHE groups (image) or aligned groups (image_aligned)")
     _add_gcs_args(ck)
     ck.set_defaults(func=cmd_check)
 
@@ -1015,13 +1029,15 @@ def main():
     _default(a, "bucket", cfg, "publish_bucket", DEFAULT_BUCKET)
     _default(a, "prefix", cfg, "publish_prefix", DEFAULT_PREFIX)
     _default(a, "clip_variant", cfg, "clip_variant")
-    _default(a, "clip_mode", cfg, "clip_mode", "gat")
-    gat = a.clip_mode == "gat"
-    _default(a, "clip_values", cfg, "clip_values", [1.0, 99.9] if gat else [1.0, 99.0])
-    _default(a, "clip_limit", cfg, "clip_limit", None if gat else 0.03)
-    if gat and a.clip_limit is not None and a.cmd in ("preprocess", "run"):
-        sys.exit("clip_limit (CLAHE) does not apply to clip_mode gat; remove it from "
-                 f"the command line and {CONFIG}, or pass --clip-mode percentile.")
+    _default(a, "clip_mode", cfg, "clip_mode", "aligned")
+    aligned = a.clip_mode == "aligned"
+    _default(a, "clip_values", cfg, "clip_values", None if aligned else [1.0, 99.0])
+    _default(a, "clip_limit", cfg, "clip_limit", None if aligned else 0.03)
+    if aligned and a.cmd in ("preprocess", "run"):
+        if a.clip_limit is not None or a.clip_values is not None:
+            sys.exit("clip_limit / clip_values (clip + CLAHE) do not apply to clip_mode "
+                     f"aligned; remove them from the command line and {CONFIG}, or pass "
+                     "--clip-mode percentile.")
     _default(a, "channel", cfg, "channel", 0)
 
     if a.cmd in ("preprocess", "run") and not a.clip_variant:

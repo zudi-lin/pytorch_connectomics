@@ -1,0 +1,67 @@
+{
+  "volume": "ExPID96_2ndgel_S1_40XW001_18x Mojtaba Tavakoli",
+  "shape_zyx": [
+    585,
+    2304,
+    2304
+  ],
+  "z_shown": 292,
+  "raw_percentiles_p1_p50_p99_p999": [
+    170.0,
+    253.0,
+    460.0,
+    599.0
+  ],
+  "old_clip_saturated_fraction": 0.07871444137008102,
+  "gain": 6.490932192981616,
+  "offset": 140.4966448792869,
+  "tissue_fraction": 1.0,
+  "tissue_median_signal": 110.93340301513672,
+  "flat_field_corner": 0.6606916785240173,
+  "codec_qa_sampled_planes": {
+    "pixels": 21233664,
+    "clipped_low": 0.00037223910108024694,
+    "clipped_high": 0.0,
+    "code0": 0.0004255977677710262,
+    "code255": 0.0,
+    "codes_used": 198,
+    "rms_error_in_range": 0.01360485889017582,
+    "bias_in_range": 3.424076930969022e-05,
+    "rms_error_over_noise": 0.05468238517642021
+  },
+  "codes_used_z_shown": 161,
+  "median_decoded_r": 1.0259798765182495,
+  "code_averaging_bias_2x2": -0.007173847407102585,
+  "second_volume": {
+    "volume": "ExPID96_2ndgel_S4_40XW002_32x Mojtaba Tavakoli",
+    "shape_zyx": [
+      796,
+      2304,
+      2304
+    ],
+    "z_shown": 398,
+    "gain": 6.151990875070894,
+    "offset": 113.49621606344108,
+    "tissue_fraction": 1.0,
+    "tissue_median_signal": 38.46409606933594,
+    "raw_median": 152.0,
+    "median_decoded_r": 1.0259798765182495,
+    "codec_qa_sampled_planes": {
+      "pixels": 21233664,
+      "clipped_low": 0.009922027587890625,
+      "clipped_high": 1.5541359230324073e-06,
+      "code0": 0.009922027587890625,
+      "code255": 1.5541359230324073e-06,
+      "codes_used": 234,
+      "rms_error_in_range": 0.01370993908494711,
+      "bias_in_range": 5.605193291557953e-05,
+      "rms_error_over_noise": 0.033556725829839706
+    }
+  },
+  "raw_median": 253.0,
+  "display": {
+    "black": 0.75,
+    "white": 4.5,
+    "gamma": 1.5
+  }
+}

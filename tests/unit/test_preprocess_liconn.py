@@ -176,7 +176,9 @@ def _shot_noise_volume(rng, gain=6.0, offset=140.0, shape=(4, 256, 256)):
     return (gain * rng.poisson(photons) + offset).astype(np.uint16)
 
 
-def test_preprocess_liconn_gat_mode_writes_full_range_and_noise_attrs(tmp_path, monkeypatch):
+def test_preprocess_liconn_aligned_mode_writes_codes_and_profile_attrs(tmp_path, monkeypatch):
+    from connectomics.data.normalization import decode_aligned
+
     input_path = tmp_path / "input.nd2"
     input_path.touch()
     output_path = tmp_path / "output.h5"
@@ -188,12 +190,33 @@ def test_preprocess_liconn_gat_mode_writes_full_range_and_noise_attrs(tmp_path, 
     with h5py.File(output_path, "r") as handle:
         data = handle["main"][:]
         attrs = handle["main"].attrs
-        assert attrs["intensity_mode"] == "gat"
-        assert attrs["noise_model_source"] == "estimated"
+        assert attrs["intensity_mode"] == "aligned"
+        assert attrs["codec"] == "sqrt_aligned_u8_v1"
         assert abs(attrs["noise_gain"] - 6.0) < 1.0
         assert abs(attrs["noise_offset"] - 140.0) < 15.0
-        np.testing.assert_allclose(attrs["stretch_percentiles"], (1.0, 99.9))
+        assert attrs["downsample_method"] == "aligned_intensity_volume_average"
+        assert "emitGrayscale" in attrs["neuroglancer_shader"]
+        offset, gain = attrs["noise_offset"], attrs["noise_gain"]
     assert data.dtype == np.uint8
-    # Integer photon counts tie at the percentiles, so the tails are approximate.
-    assert 0.005 <= np.mean(data == 0) <= 0.03
-    assert 0.0 < np.mean(data == 255) <= 0.005
+    tissue = raw.astype(np.float32) - offset > 9.0 * gain
+    assert np.median(decode_aligned(data)[tissue]) == pytest.approx(1.0, abs=0.1)
+
+
+def test_preprocess_liconn_aligned_downsampling_averages_aligned_values(tmp_path, monkeypatch):
+    from connectomics.data.normalization import decode_aligned, encode_aligned
+
+    input_path = tmp_path / "input.nd2"
+    input_path.touch()
+    full, half = tmp_path / "full.h5", tmp_path / "half.h5"
+    raw = _shot_noise_volume(np.random.default_rng(1))
+    monkeypatch.setattr(preprocess_liconn, "read_volume", lambda _: raw)
+    kwargs = dict(stats_planes=4, noise_model=(6.0, 140.0), flat_field=False)
+
+    preprocess_liconn.preprocess_liconn(input_path, full, **kwargs)
+    preprocess_liconn.preprocess_liconn(input_path, half, downsample_factor=(2, 2, 2), **kwargs)
+
+    with h5py.File(full, "r") as a, h5py.File(half, "r") as b:
+        level0, level1 = a["main"][:], b["main"][:]
+    # Re-encoding the mean of per-voxel aligned values, not the mean of codes.
+    per_voxel = decode_aligned(level0).reshape(2, 2, 128, 2, 128, 2).mean(axis=(1, 3, 5))
+    assert np.mean(np.abs(level1.astype(int) - encode_aligned(per_voxel).astype(int))) < 0.5

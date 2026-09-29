@@ -109,8 +109,12 @@ def _create(grp, level: int, shape):
     )
 
 
-def _reduce_level(grp, src_level: int, dst_level: int, z_slab: int = CHUNK) -> tuple:
+def _reduce_level(grp, src_level: int, dst_level: int, z_slab: int = CHUNK,
+                  reduce_block=None) -> tuple:
     """Write `dst_level` as the (2,2,2) block average of `src_level`, streaming.
+
+    `reduce_block` replaces the uint8 block average, e.g. with
+    `nd2_source.aligned_block_average` for aligned-intensity codes.
 
     The odd trailing plane/row/column of the source is dropped, matching the
     published pyramid: `out = in // 2` exactly, never a padded edge.
@@ -127,12 +131,13 @@ def _reduce_level(grp, src_level: int, dst_level: int, z_slab: int = CHUNK) -> t
     for z0 in range(0, out_shape[0] * 2, slab):
         z1 = min(z0 + slab, out_shape[0] * 2)
         block = np.asarray(src[z0:z1, : sy // 2 * 2, : sx // 2 * 2])
-        dst[z0 // 2 : z1 // 2] = block_average_uint8(block)
+        dst[z0 // 2 : z1 // 2] = (reduce_block or block_average_uint8)(block)
     return out_shape
 
 
 def write_pyramid(dest: Path, plane_iter, shape_zyx, spacing_zyx, attrs: dict,
-                  levels: int = LEVELS_BELOW_ZERO, z_slab: int = CHUNK) -> dict:
+                  levels: int = LEVELS_BELOW_ZERO, z_slab: int = CHUNK,
+                  reduce_block=None) -> dict:
     """Stream `plane_iter` (uint8 YX planes, Z-ordered) into a zarr v2 pyramid.
 
     Staged at `.<name>.tmp` and renamed, so an interrupted run never leaves a
@@ -171,7 +176,8 @@ def write_pyramid(dest: Path, plane_iter, shape_zyx, spacing_zyx, attrs: dict,
 
     shapes = [tuple(shape_zyx)]
     for level in range(1, levels + 1):
-        out_shape = _reduce_level(grp, level - 1, level, z_slab=z_slab)
+        out_shape = _reduce_level(grp, level - 1, level, z_slab=z_slab,
+                                  reduce_block=reduce_block)
         if out_shape is None:
             break
         shapes.append(out_shape)
@@ -189,7 +195,8 @@ def write_pyramid(dest: Path, plane_iter, shape_zyx, spacing_zyx, attrs: dict,
 
 def provenance_attrs(*, source: str, source_channel: int, source_shape_zyx,
                      spacing_nm_zyx, clip_mode: str, clip_values, clip_limit: float | None,
-                     spacing_basis: str = "biological", mapping: dict | None = None) -> dict:
+                     spacing_basis: str = "biological",
+                     intensity_attrs: dict | None = None) -> dict:
     """The non-OME half of `.zattrs`, keyed exactly as preprocess_liconn writes it.
 
     SPACING BASIS. Every published moe group records *biological* spacing:
@@ -204,9 +211,12 @@ def provenance_attrs(*, source: str, source_channel: int, source_shape_zyx,
     wrong by the expansion fold, which is why the warning is in the metadata and
     not only in a log.
 
-    INTENSITY. `clip_mode='gat'` records the volume's Anscombe mapping under
-    the keys `scripts/preprocess_liconn.py --intensity-mode gat` writes, in place
-    of the clip/CLAHE keys; the legacy modes keep the published key set.
+    INTENSITY. `clip_mode='aligned'` merges `intensity_attrs` -- the alignment
+    fit, fixed code table and display shader, keyed exactly as
+    `scripts/preprocess_liconn.py --intensity-mode aligned` writes them and built
+    by `nd2_source.intensity_attrs` -- in place of the clip/CLAHE keys, and
+    records the aligned pyramid reduction. The legacy modes keep the published
+    key set. Precomputed so this stays numpy-free for `refold` on the host.
     """
     attrs = {
         "axes": "ZYX",
@@ -219,21 +229,11 @@ def provenance_attrs(*, source: str, source_channel: int, source_shape_zyx,
         "input_spacing_nm_zyx": [float(v) for v in spacing_nm_zyx],
         "spacing_nm_zyx": [float(v) for v in spacing_nm_zyx],
     }
-    if clip_mode == "gat":
-        if mapping is None:
-            raise ValueError("clip_mode 'gat' needs its mapping recorded")
-        low, high = (float(v) for v in mapping["stretch_range"])
-        attrs.update({
-            "intensity_mode": "gat",
-            "noise_model": "variance = gain * (x - offset)",
-            "noise_gain": float(mapping["gain"]),
-            "noise_offset": float(mapping["offset"]),
-            "noise_model_source": mapping["noise_model_source"],
-            "stats_z_indices": [int(v) for v in mapping["stats_z_indices"]],
-            "stretch_percentiles": [float(v) for v in mapping["stretch_percentiles"]],
-            "stretch_range_anscombe": [low, high],
-            "noise_sigma_uint8_levels": 255.0 / (high - low),
-        })
+    if clip_mode == "aligned":
+        if not intensity_attrs or intensity_attrs.get("intensity_mode") != "aligned":
+            raise ValueError("clip_mode 'aligned' needs its intensity_attrs recorded")
+        attrs["downsample_method"] = "aligned_intensity_volume_average"
+        attrs.update(intensity_attrs)
     elif clip_mode in ("percentile", "fixed_intensity"):
         attrs["clahe_clip_limit"] = "none" if clip_limit is None else float(clip_limit)
         attrs["clip_mode"] = clip_mode

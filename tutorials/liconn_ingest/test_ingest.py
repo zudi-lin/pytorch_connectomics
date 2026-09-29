@@ -306,16 +306,17 @@ def test_genuinely_absent_group_still_reports_incomplete():
         ingest.subprocess.run = real
 
 
-def test_gat_groups_publish_beside_not_over_the_legacy_groups():
-    """A gat conversion of an already published volume shares its name. If it
+def test_aligned_groups_publish_beside_not_over_the_legacy_groups():
+    """An aligned conversion of an already published volume shares its name. If it
     shared the path too, `run` would skip it as done and `publish` would
     overwrite the clip+CLAHE group that neuron_liconn_moe reads."""
     legacy = ingest.gcs_dest("donglai_public", "liconn/moe", "ExPID96_2ndgel_S1_40XW001_18x",
                              "ExPID96_2ndgel_S1_40XW001_18x", "percentile")
-    gat = ingest.gcs_dest("donglai_public", "liconn/moe", "ExPID96_2ndgel_S1_40XW001_18x",
-                          "ExPID96_2ndgel_S1_40XW001_18x", "gat")
+    aligned = ingest.gcs_dest("donglai_public", "liconn/moe",
+                              "ExPID96_2ndgel_S1_40XW001_18x",
+                              "ExPID96_2ndgel_S1_40XW001_18x", "aligned")
     assert legacy == ("gs://donglai_public/liconn/moe/expid96/image/"
                       "ExPID96_2ndgel_S1_40XW001_18x.zarr")
-    assert gat == ("gs://donglai_public/liconn/moe/expid96/image_gat/"
-                   "ExPID96_2ndgel_S1_40XW001_18x.zarr")
+    assert aligned == ("gs://donglai_public/liconn/moe/expid96/image_aligned/"
+                       "ExPID96_2ndgel_S1_40XW001_18x.zarr")
     assert ingest.image_dir("fixed_intensity") == "image"

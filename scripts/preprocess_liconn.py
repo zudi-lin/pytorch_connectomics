@@ -4,14 +4,14 @@
 The input is loaded at its native (level-0) resolution through PyTC's canonical
 volume reader and mapped to uint8 by one of two intensity modes:
 
-* ``gat`` (default): LICONN fluorescence is shot-noise limited, with noise
-  variance ``gain * (x - offset)``. The volume's gain and offset are fitted from
-  low-structure blocks of sampled XY planes (or given with ``--noise-model``),
-  and the generalized Anscombe transform ``2 * sqrt((x - offset) / gain + 3/8)``
-  makes the noise ~1 unit everywhere. One affine stretch per volume then maps
-  the transformed 1st/99.9th percentiles to 0/255, so the stored data uses the
-  full uint8 range without saturating bright synaptic/vesicle puncta. The same
-  pointwise mapping is applied to every plane; no CLAHE.
+* ``aligned`` (default): one uint8 copy that serves both deep learning and
+  browser viewing. Each volume is aligned to a shared intensity profile,
+  ``r = (x - offset) / (flat_field(y, x) * tissue_median)`` (0 = no light,
+  1 = tissue median, illumination falloff divided out), with offset and gain
+  from a shot-noise fit on sampled planes. ``r`` is stored through the fixed
+  code table in ``connectomics.data.normalization.codec`` (the same for every
+  volume); training decodes it with ``image_transform.normalize: aligned-u8``
+  and browsers apply the fixed display shader recorded in the attributes.
 * ``linear``: each XY plane is clipped to a fixed raw range (120--350 by
   default) or per-plane percentiles, optionally CLAHE-enhanced, then scaled.
 
@@ -44,7 +44,6 @@ from connectomics.data.io import read_volume
 
 
 DEFAULT_CLIP_INTENSITY_RANGE = (120.0, 350.0)
-DEFAULT_STRETCH_PERCENTILES = (1.0, 99.9)
 DEFAULT_STATS_PLANES = 16
 
 
@@ -176,10 +175,10 @@ def preprocess_liconn(
     *,
     channel: int = 0,
     dataset: str = "main",
-    intensity_mode: str = "gat",
-    stretch_percentiles: tuple[float, float] = DEFAULT_STRETCH_PERCENTILES,
+    intensity_mode: str = "aligned",
     stats_planes: int = DEFAULT_STATS_PLANES,
     noise_model: tuple[float, float] | None = None,
+    flat_field: bool = True,
     lower_percentile: float = 1.0,
     upper_percentile: float = 99.0,
     clip_intensity_range: tuple[float, float] | None = DEFAULT_CLIP_INTENSITY_RANGE,
@@ -192,9 +191,10 @@ def preprocess_liconn(
 ) -> Path:
     """Preprocess one LICONN volume and atomically write a uint8 HDF5 file.
 
-    The intensity mapping is applied before downsampling. Downsampling is
-    streamed over source Z planes so the full processed uint8 volume is never
-    materialized in memory.
+    The intensity mapping is applied before downsampling; in ``aligned`` mode
+    blocks are averaged in aligned units and re-encoded, never as codes.
+    Downsampling is streamed over source Z planes so the full processed volume
+    is never materialized in memory.
     """
     if not input_path.exists():
         raise FileNotFoundError(f"Input not found: {input_path}")
@@ -206,8 +206,10 @@ def preprocess_liconn(
         )
     if not dataset or dataset.strip("/") == "":
         raise ValueError("HDF5 dataset name must not be empty.")
-    if intensity_mode not in {"gat", "linear"}:
-        raise ValueError(f"Unknown intensity_mode {intensity_mode!r}; use 'gat' or 'linear'.")
+    if intensity_mode not in {"aligned", "linear"}:
+        raise ValueError(
+            f"Unknown intensity_mode {intensity_mode!r}; use 'aligned' or 'linear'."
+        )
     if compression not in {None, "gzip", "lzf"}:
         raise ValueError(f"Unsupported HDF5 compression: {compression!r}.")
     if compression == "gzip" and not 0 <= compression_level <= 9:
@@ -222,36 +224,45 @@ def preprocess_liconn(
     output_shape = (z_size // z_factor, y_size // y_factor, x_size // x_factor)
     output_z_size, output_y_size, output_x_size = output_shape
 
-    if intensity_mode == "gat":
+    if intensity_mode == "aligned":
         # Imported here, not at module level: tutorials/liconn_ingest/nd2_source.py
         # loads this script with `connectomics` stubbed down to `read_volume`.
-        from connectomics.data.normalization import anscombe_to_uint8, fit_anscombe_mapping
-
-        mapping = fit_anscombe_mapping(
-            structural,
-            stats_planes=stats_planes,
-            stretch_percentiles=stretch_percentiles,
-            noise_model=noise_model,
+        from connectomics.data.normalization import (
+            alignment_attrs,
+            encode_aligned,
+            fit_alignment,
+            flat_field_image,
+            to_aligned,
         )
-        low, high = mapping["stretch_range"]
+
+        alignment = fit_alignment(
+            structural, stats_planes=stats_planes, noise_model=noise_model, flat_field=flat_field
+        )
+        flat = flat_field_image(alignment, (y_size, x_size))
         print(
-            f"Noise model ({mapping['noise_model_source']}): variance = "
-            f"{mapping['gain']:.3f} * (x - {mapping['offset']:.1f}); "
-            f"transformed range [{low:.2f}, {high:.2f}] -> [0, 255], "
-            f"noise sigma = {255.0 / (high - low):.1f} uint8 levels"
+            f"Alignment ({alignment['noise_model_source']} noise model): offset "
+            f"{alignment['offset']:.1f}, gain {alignment['gain']:.3f}, tissue median "
+            f"{alignment['tissue_median_over_gain']:.1f} x gain "
+            f"({100 * alignment['tissue_fraction']:.0f}% tissue), flat field "
+            f"{'min %.2f' % flat.min() if alignment['flat_field'] else 'off'}"
+        )
+        qa = alignment["codec_qa"]
+        print(
+            f"Codec QA (sampled planes): below offset {100 * qa['clipped_low']:.2f}%, "
+            f"above r_max {100 * qa['clipped_high']:.3f}%, round-trip "
+            f"{qa['rms_error_over_noise']:.3f} x noise SD"
         )
 
-        def process_plane(plane: np.ndarray) -> np.ndarray:
-            return anscombe_to_uint8(
-                plane,
-                gain=mapping["gain"],
-                offset=mapping["offset"],
-                stretch_range=mapping["stretch_range"],
-            )
+        def plane_values(plane: np.ndarray) -> np.ndarray:
+            return to_aligned(plane, alignment, flat)
 
+        def values_to_uint8(mean_values: np.ndarray) -> np.ndarray:
+            return encode_aligned(mean_values)
+
+        accumulate_dtype = np.float64
     else:
 
-        def process_plane(plane: np.ndarray) -> np.ndarray:
+        def plane_values(plane: np.ndarray) -> np.ndarray:
             return preprocess_xy_plane(
                 plane,
                 lower_percentile=lower_percentile,
@@ -259,6 +270,11 @@ def preprocess_liconn(
                 clip_intensity_range=clip_intensity_range,
                 clip_limit=clip_limit,
             )
+
+        def values_to_uint8(mean_values: np.ndarray) -> np.ndarray:
+            return np.rint(mean_values).astype(np.uint8)
+
+        accumulate_dtype = np.uint64
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     temp_file = tempfile.NamedTemporaryFile(
@@ -284,23 +300,20 @@ def preprocess_liconn(
             output.attrs["source_channel"] = channel
             output.attrs["source_shape_zyx"] = structural.shape
             output.attrs["downsample_factor_zyx"] = downsample_factor
-            output.attrs["downsample_method"] = "aligned_arithmetic_volume_average"
+            output.attrs["downsample_method"] = (
+                "aligned_intensity_volume_average"
+                if intensity_mode == "aligned"
+                else "aligned_arithmetic_volume_average"
+            )
             output.attrs["downsample_rounding"] = "nearest_even"
             if input_spacing is not None:
                 output.attrs["input_spacing_nm_zyx"] = input_spacing
                 output.attrs["spacing_nm_zyx"] = input_spacing * np.asarray(
                     downsample_factor, dtype=np.float64
                 )
-            if intensity_mode == "gat":
-                output.attrs["intensity_mode"] = "gat"
-                output.attrs["noise_model"] = "variance = gain * (x - offset)"
-                output.attrs["noise_gain"] = mapping["gain"]
-                output.attrs["noise_offset"] = mapping["offset"]
-                output.attrs["noise_model_source"] = mapping["noise_model_source"]
-                output.attrs["stats_z_indices"] = mapping["stats_z_indices"]
-                output.attrs["stretch_percentiles"] = mapping["stretch_percentiles"]
-                output.attrs["stretch_range_anscombe"] = mapping["stretch_range"]
-                output.attrs["noise_sigma_uint8_levels"] = 255.0 / (high - low)
+            if intensity_mode == "aligned":
+                for key, value in alignment_attrs(alignment).items():
+                    output.attrs[key] = value
             else:
                 if clip_intensity_range is None:
                     output.attrs["clip_mode"] = "percentile"
@@ -314,24 +327,24 @@ def preprocess_liconn(
 
             block_voxels = z_factor * y_factor * x_factor
             for output_z in range(output_z_size):
-                block_sum = np.zeros((output_y_size, output_x_size), dtype=np.uint64)
+                block_sum = np.zeros((output_y_size, output_x_size), dtype=accumulate_dtype)
                 source_z_start = output_z * z_factor
                 for z_offset in range(z_factor):
                     source_z = source_z_start + z_offset
-                    processed_plane = process_plane(structural[source_z])
-                    plane_blocks = processed_plane.astype(np.uint32).reshape(
+                    values = plane_values(structural[source_z])
+                    plane_blocks = values.astype(accumulate_dtype).reshape(
                         output_y_size,
                         y_factor,
                         output_x_size,
                         x_factor,
                     )
-                    block_sum += plane_blocks.sum(axis=(1, 3), dtype=np.uint64)
+                    block_sum += plane_blocks.sum(axis=(1, 3), dtype=accumulate_dtype)
 
                     planes_processed = source_z + 1
                     if planes_processed % 25 == 0 or planes_processed == z_size:
                         print(f"Processed source XY planes: {planes_processed}/{z_size}")
 
-                output[output_z] = np.rint(block_sum / block_voxels).astype(np.uint8)
+                output[output_z] = values_to_uint8(block_sum / block_voxels)
 
         os.replace(temp_path, output_path)
     except BaseException:
@@ -344,9 +357,9 @@ def preprocess_liconn(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Map a single-tile LICONN structural volume to uint8 (noise-stabilizing "
-            "Anscombe transform by default), optionally reduce it by aligned volume "
-            "averaging, then save losslessly compressed uint8 HDF5."
+            "Map a single-tile LICONN structural volume to uint8 (shared aligned-"
+            "intensity profile and fixed code table by default), optionally reduce it "
+            "by aligned volume averaging, then save losslessly compressed uint8 HDF5."
         )
     )
     parser.add_argument("input", type=Path, help="Input volume (typically a single-tile ND2 file).")
@@ -362,26 +375,24 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--intensity-mode",
-        choices=("gat", "linear"),
-        default="gat",
+        choices=("aligned", "linear"),
+        default="aligned",
         help=(
-            "gat: per-volume noise-model Anscombe transform stretched to 0-255 "
-            "(default). linear: per-plane clip (+ optional CLAHE)."
+            "aligned: per-volume alignment to the shared profile, fixed uint8 code "
+            "table (default). linear: per-plane clip (+ optional CLAHE)."
         ),
-    )
-    parser.add_argument(
-        "--stretch-percentiles",
-        type=float,
-        nargs=2,
-        metavar=("LOW", "HIGH"),
-        default=DEFAULT_STRETCH_PERCENTILES,
-        help="gat: transformed-intensity percentiles mapped to 0 and 255. Default: 1 99.9.",
     )
     parser.add_argument(
         "--stats-planes",
         type=int,
         default=DEFAULT_STATS_PLANES,
-        help="gat: evenly spaced Z planes used for the volume statistics. Default: 16.",
+        help="aligned: evenly spaced Z planes used for the volume statistics. Default: 16.",
+    )
+    parser.add_argument(
+        "--no-flat-field",
+        dest="flat_field",
+        action="store_false",
+        help="aligned: skip the illumination (vignetting) correction.",
     )
     parser.add_argument(
         "--noise-model",
@@ -389,7 +400,7 @@ def parse_args() -> argparse.Namespace:
         nargs=2,
         metavar=("GAIN", "OFFSET"),
         default=None,
-        help="gat: use variance = GAIN * (x - OFFSET) instead of fitting it.",
+        help="aligned: use variance = GAIN * (x - OFFSET) instead of fitting it.",
     )
     clipping = parser.add_mutually_exclusive_group()
     clipping.add_argument(
@@ -472,8 +483,8 @@ def main() -> None:
         channel=args.channel,
         dataset=args.dataset,
         intensity_mode=args.intensity_mode,
-        stretch_percentiles=tuple(args.stretch_percentiles),
         stats_planes=args.stats_planes,
+        flat_field=args.flat_field,
         noise_model=tuple(args.noise_model) if args.noise_model is not None else None,
         lower_percentile=lower_percentile,
         upper_percentile=upper_percentile,

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Stream one LICONN ND2 as uint8 ZYX planes.
 
-Two intensity paths. `gat` (the default in ingest.py) fits one noise model and
-one stretch per volume from sampled planes (`fit_anscombe`), then maps every
-plane with that same pointwise function -- see
-`connectomics/data/normalization/anscombe.py`. The legacy `percentile` /
+Two intensity paths. `aligned` (the default in ingest.py) fits one alignment
+per volume from sampled planes (`fit_alignment`: offset, gain, flat field,
+tissue median) and stores every plane through the fixed code table -- see
+`connectomics/data/normalization/`. The legacy `percentile` /
 `fixed_intensity` paths clip each plane on its own and apply CLAHE through
 `scripts/preprocess_liconn.py::preprocess_xy_plane`.
 
@@ -35,29 +35,38 @@ _PREPROCESS_CANDIDATES = (
     Path(__file__).resolve().parents[2] / "scripts" / "preprocess_liconn.py",
     Path("/workspace/scripts/preprocess_liconn.py"),
 )
-_ANSCOMBE_RELATIVE = Path("connectomics") / "data" / "normalization" / "anscombe.py"
-_ANSCOMBE_CANDIDATES = (
-    Path(__file__).resolve().parents[2] / _ANSCOMBE_RELATIVE,
-    Path("/workspace") / _ANSCOMBE_RELATIVE,
+_NORMALIZATION_RELATIVE = Path("connectomics") / "data" / "normalization"
+_NORMALIZATION_CANDIDATES = (
+    Path(__file__).resolve().parents[2] / _NORMALIZATION_RELATIVE,
+    Path("/workspace") / _NORMALIZATION_RELATIVE,
 )
 DEFAULT_STATS_PLANES = 16
+_NORMALIZATION = None
 
 
-def load_anscombe_module():
-    """Load the repo's Anscombe normalization by path, not via `connectomics`.
+def load_normalization_package():
+    """Load `connectomics/data/normalization` by path, not via `connectomics`.
 
-    Importing the package would pull torch and MONAI into this CPU image (see
-    the top of this file); `anscombe.py` needs only numpy and scipy, so the
-    pixel math stays the repo's rather than a copy.
+    Importing `connectomics.data` would pull torch and MONAI into this CPU image
+    (see the top of this file); the normalization package needs only numpy and
+    scipy, so the pixel math and the code table stay the repo's, not a copy.
     """
-    for path in _ANSCOMBE_CANDIDATES:
-        if path.exists():
+    global _NORMALIZATION
+    if _NORMALIZATION is not None:
+        return _NORMALIZATION
+    for path in _NORMALIZATION_CANDIDATES:
+        if (path / "__init__.py").exists():
             break
     else:
-        raise FileNotFoundError(f"anscombe.py not found in {_ANSCOMBE_CANDIDATES}")
-    spec = importlib.util.spec_from_file_location("_liconn_anscombe", path)
+        raise FileNotFoundError(
+            f"normalization package not found in {_NORMALIZATION_CANDIDATES}")
+    name = "_liconn_normalization"
+    spec = importlib.util.spec_from_file_location(
+        name, path / "__init__.py", submodule_search_locations=[str(path)])
     mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod                 # relative imports resolve through this
     spec.loader.exec_module(mod)
+    _NORMALIZATION = mod
     return mod
 
 
@@ -204,53 +213,70 @@ def _structural_lazy(f, path: str, channel: int):
     return lazy
 
 
-def fit_anscombe(path: str | Path, channel: int = 0, *, stretch_percentiles=(1.0, 99.9),
-                 stats_planes: int = DEFAULT_STATS_PLANES) -> dict:
-    """Fit the volume's noise model and stretch; returns a JSON-ready mapping.
+def fit_alignment(path: str | Path, channel: int = 0, *, flat_field: bool = True,
+                  stats_planes: int = DEFAULT_STATS_PLANES) -> dict:
+    """Fit the volume's alignment to the shared profile; returns a JSON-ready dict.
 
     Reads only `stats_planes` evenly spaced planes. The result is what
-    `iter_planes(clip_mode="gat", mapping=...)` applies to every plane and what
-    `zarr_writer.provenance_attrs` records.
+    `iter_planes(clip_mode="aligned", alignment=...)` applies to every plane.
     """
     import nd2
 
-    ans = load_anscombe_module()
+    norm = load_normalization_package()
     path = str(path)
     with nd2.ND2File(path) as f:
-        mapping = ans.fit_anscombe_mapping(
-            _structural_lazy(f, path, channel), stats_planes=stats_planes,
-            stretch_percentiles=tuple(float(v) for v in stretch_percentiles))
-    return anscombe_mapping_json(mapping)
+        return norm.fit_alignment(_structural_lazy(f, path, channel),
+                                  stats_planes=stats_planes, flat_field=flat_field)
 
 
-def anscombe_mapping_json(mapping: dict) -> dict:
-    """`fit_anscombe_mapping` output as plain JSON types, for .zattrs/provenance."""
-    return {"gain": float(mapping["gain"]), "offset": float(mapping["offset"]),
-            "noise_model_source": mapping["noise_model_source"],
-            "stretch_percentiles": [float(v) for v in mapping["stretch_percentiles"]],
-            "stretch_range": [float(v) for v in mapping["stretch_range"]],
-            "stats_z_indices": [int(v) for v in mapping["stats_z_indices"]]}
+def intensity_attrs(alignment: dict) -> dict:
+    """The `.zattrs` intensity keys for an aligned volume (fit + code table + display)."""
+    return load_normalization_package().alignment_attrs(alignment)
+
+
+def aligned_block_average(volume: np.ndarray, factor=(2, 2, 2)) -> np.ndarray:
+    """Pyramid reduction for aligned codes: average in aligned units, re-encode.
+
+    Averaging the codes themselves would bias every coarser level low, because
+    the code table is a square root. Works two source planes at a time so a
+    128-plane slab never exists as float32.
+    """
+    norm = load_normalization_package()
+    fz, fy, fx = factor
+    z, y, x = volume.shape
+    if (z % fz, y % fy, x % fx) != (0, 0, 0):
+        raise ValueError(f"shape {volume.shape} is not divisible by factor {factor}")
+    out = np.empty((z // fz, y // fy, x // fx), dtype=np.uint8)
+    for oz in range(z // fz):
+        aligned = norm.decode_aligned(volume[oz * fz:(oz + 1) * fz])
+        mean = aligned.reshape(fz, y // fy, fy, x // fx, fx).mean(axis=(0, 2, 4))
+        out[oz] = norm.encode_aligned(mean)
+    return out
 
 
 def plane_mapper(clip_mode: str, clip_values=(1.0, 99.0), clip_limit: float | None = 0.03,
-                 mapping: dict | None = None):
+                 alignment: dict | None = None):
     """The raw-plane -> uint8-plane function for one volume.
 
-    `gat` applies the volume's fixed Anscombe mapping (fitted up front, so
-    streaming stays exactly equivalent to a whole-volume pass). The legacy modes
-    compute their percentiles per plane, which is streaming-safe for the same
-    reason: no plane's output depends on another plane.
+    `aligned` applies the volume's fixed alignment (fitted up front, so
+    streaming stays exactly equivalent to a whole-volume pass) and the fixed
+    code table. The legacy modes compute their percentiles per plane, which is
+    streaming-safe for the same reason: no plane's output depends on another.
     """
-    if clip_mode == "gat":
-        if mapping is None:
-            raise ValueError("clip_mode 'gat' needs the volume mapping from fit_anscombe")
+    if clip_mode == "aligned":
+        if alignment is None:
+            raise ValueError("clip_mode 'aligned' needs the volume alignment from fit_alignment")
         if clip_limit is not None:
-            raise ValueError("CLAHE does not apply to clip_mode 'gat'; unset clip_limit")
-        ans = load_anscombe_module()
-        gain, offset = mapping["gain"], mapping["offset"]
-        stretch = tuple(mapping["stretch_range"])
-        return lambda plane: ans.anscombe_to_uint8(plane, gain=gain, offset=offset,
-                                                   stretch_range=stretch)
+            raise ValueError("CLAHE does not apply to clip_mode 'aligned'; unset clip_limit")
+        norm = load_normalization_package()
+        flats = {}
+
+        def to_uint8(plane):
+            if plane.shape not in flats:
+                flats[plane.shape] = norm.flat_field_image(alignment, plane.shape)
+            return norm.encode_aligned(norm.to_aligned(plane, alignment, flats[plane.shape]))
+
+        return to_uint8
 
     pre = load_preprocess_module()
     kwargs = {"clip_limit": clip_limit}
@@ -267,11 +293,11 @@ def plane_mapper(clip_mode: str, clip_values=(1.0, 99.0), clip_limit: float | No
 
 def iter_planes(path: str | Path, channel: int = 0, *, clip_mode: str = "percentile",
                 clip_values=(1.0, 99.0), clip_limit: float | None = 0.03,
-                mapping: dict | None = None):
+                alignment: dict | None = None):
     """Yield uint8 YX planes in Z order; see `plane_mapper` for the intensity path."""
     import nd2
 
-    to_uint8 = plane_mapper(clip_mode, clip_values, clip_limit, mapping)
+    to_uint8 = plane_mapper(clip_mode, clip_values, clip_limit, alignment)
     path = str(path)
     with nd2.ND2File(path) as f:
         lazy = _structural_lazy(f, path, channel)
