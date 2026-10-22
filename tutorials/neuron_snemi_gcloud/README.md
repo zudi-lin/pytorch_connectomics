@@ -33,7 +33,7 @@ VM. Check current VM, disk, quota, and image state before a billable launch;
 use the runtime/deletion backstop described in that handoff.
 
 ```bash
-export CLOUDSDK_CORE_PROJECT=sunny-catalyst-506019-a2
+export CLOUDSDK_CORE_PROJECT=<your-gcp-project>
 export SNEMI_GCS=gs://donglai/em/snemi
 export DATA_ROOT=/work/datasets
 export OUTPUT_ROOT="/work/outputs/snemi-job-$(date -u +%Y%m%d_%H%M%S)"

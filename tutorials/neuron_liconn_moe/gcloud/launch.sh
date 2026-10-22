@@ -33,7 +33,7 @@
 
 set -euo pipefail
 
-PROJECT="${PROJECT:-sunny-catalyst-506019-a2}"
+PROJECT="${PROJECT:?set PROJECT to your GCP project id}"
 # MUST MATCH THE BUCKETS' REGION. `gs://donglai` and `gs://donglai_public` are
 # both US-EAST1 regional. Running the VMs in us-central1 made every byte an
 # inter-region transfer at $0.02/GiB: 14.1 GiB per volume (4.83 image archive +
@@ -342,7 +342,7 @@ print(int(q.get('PREEMPTIBLE_NVIDIA_L4_GPUS',{'limit':0})['limit']))")
     g iam service-accounts describe "$SA" >/dev/null 2>&1 \
         && ok "exists" \
         || { bad "does not exist"; fix "gcloud iam service-accounts create pytc-trainer --project=$PROJECT"; }
-    # The VM runs unattended, so `donglai@mindspan.org` being able to read and
+    # The VM runs unattended, so `<your-gcloud-account>` being able to read and
     # write says nothing. These are what the stage scripts actually need. Note
     # there is no Artifact Registry row: the image is a GCS object, which is
     # exactly why this path needs no grant from the project owner.

@@ -186,7 +186,7 @@ DEFAULT_OUT_ROOT = REPO / "outputs/neuron_liconn_moe/eb2"
 OUT_ROOT = Path(os.environ.get("MOE_OUT_ROOT", DEFAULT_OUT_ROOT))
 
 # Publication target: the PUBLIC bucket (not anonymously readable -- reads and
-# writes need the donglai@mindspan.org account), which holds both the OME-Zarr
+# writes need the <your-gcloud-account> account), which holds both the OME-Zarr
 # image groups and the segmentation layers, so layers sit next to the images
 # they overlay.
 GCS_BUCKET = os.environ.get("LICONN_MOE_GCS_BUCKET") or "donglai_public"
@@ -242,7 +242,7 @@ def gcs_folder(name: str, kind: str | None = None) -> str:
 
 # ngauth server for the private `donglai` bucket, kept for reference. Whether it
 # is authorised for `donglai_public` has not been established.
-NGAUTH = f"gs+ngauth+https://sunny-catalyst-506019-a2.ue.r.appspot.com/{GCS_BUCKET}"
+NGAUTH = f"gs+ngauth+https://<your-ngauth-host>/{GCS_BUCKET}"
 
 
 def layer_url(layer: str, volume: str, kind: str | None = None) -> str:

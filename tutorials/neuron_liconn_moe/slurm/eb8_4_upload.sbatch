@@ -4,7 +4,7 @@
 # Split from the build (eb8_3_precomputed.sbatch) because the build is CPU-bound
 # and the upload is network-bound. Runs on a COMPUTE node: verified 2026-09-16
 # that compute nodes resolve storage.googleapis.com and the stored
-# donglai@mindspan.org credential works there, contradicting the older comment in
+# <your-gcloud-account> credential works there, contradicting the older comment in
 # 3_precomputed.sbatch that upload needs an interactive login.
 #
 # MOE_OUT_ROOT picks both the staging tree and the GCS kind, so this lands in

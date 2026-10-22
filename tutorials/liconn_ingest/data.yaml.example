@@ -17,7 +17,7 @@ inbox: ./inbox                  # local landing zone; pruned after a passed veri
 work: ./liconn_ingest_work      # per-cube state, provenance.json, COMPLETE markers
 
 # --- Google Cloud ----------------------------------------------------------
-gcp_project: sunny-catalyst-506019-a2
+gcp_project: <your-gcp-project>
 publish_bucket: donglai_public  # NOT anonymously readable despite the name (401)
 publish_prefix: liconn/moe
 

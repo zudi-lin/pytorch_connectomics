@@ -120,8 +120,8 @@ checks prerequisites before allocating a VM:
 ```bash
 python tutorials/dispim_gcloud/launch_stage.py gpu \
   --run-prefix gs://donglai/dispim/snemi/cloud-runs/UNIQUE-RUN \
-  --project sunny-catalyst-506019-a2 --zone us-west1-a --name UNIQUE-GPU-VM \
-  --service-account pytc-trainer@sunny-catalyst-506019-a2.iam.gserviceaccount.com
+  --project <your-gcp-project> --zone us-west1-a --name UNIQUE-GPU-VM \
+  --service-account pytc-trainer@<your-gcp-project>.iam.gserviceaccount.com
 ```
 
 `vm_stage.sh` uses fresh Docker containers for smoke, training, and inference.

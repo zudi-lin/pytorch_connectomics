@@ -223,7 +223,7 @@ default:
           {python_exe} scripts/run_abiss_volume.py
           --input {input_h5}
           --output {output_h5}
-          --abiss-home /home/mansour8/pytc_dev/pytorch_connectomics/abiss
+          --abiss-home <path-to>/pytorch_connectomics/abiss
           --ws-high-threshold 0.9
           --ws-low-threshold 0.3
           --ws-size-threshold 100
@@ -370,7 +370,7 @@ test:
     # Use window_size: [32, 256, 256] so the sliding window fits within Z=59.
     # No label available — inference only (evaluation.enabled: false).
     test:
-      # image: /orcd/data/edboyden/002/mansour8/deb_data/BA_5AA_proteintest_1_2026-02-18_17.25.37_channel1_ffn_sharp.zarr
+      # image: <path-to>/deb_data/BA_5AA_proteintest_1_2026-02-18_17.25.37_channel1_ffn_sharp.zarr
       image:
         /orcd/data/edboyden/002/dleible/DL288B/DL288B_251222S_cond5_40x_12tiles_round1_fused_488_crop512x1024x1024.tif
       # label: omitted — no ground truth available for this volume

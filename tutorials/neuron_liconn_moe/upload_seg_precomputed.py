@@ -24,7 +24,7 @@ hundred across the field.
 WHY IT IS BUILT LOCALLY AND THEN rsync'd, RATHER THAN WRITTEN STRAIGHT TO GCS.
 There is no `~/.config/gcloud/application_default_credentials.json` on this host,
 so CloudVolume / igneous / tensorstore cannot authenticate to either bucket at
-all; only the `gcloud` CLI can (as `donglai@mindspan.org`). The compute service
+all; only the `gcloud` CLI can (as `<your-gcloud-account>`). The compute service
 account `pytc-trainer@...` has objectViewer on `donglai` but not objectCreator,
 so a key would not help either.
 

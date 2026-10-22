@@ -4,7 +4,7 @@ How a raw LICONN fluorescence volume becomes the single uint8 copy that serves
 both the browser and deep learning, one step at a time, with the code that
 runs each step and figures from real data.
 
-The design is the *LICONN foundation model preprocessing plan* (Google Doc).
+The design is the LICONN foundation model preprocessing plan.
 This tutorial covers what is implemented in this repository. The items the
 plan proposes but that are not built yet are listed at the
 [end](#not-implemented-yet).

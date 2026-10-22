@@ -130,7 +130,7 @@ The VM service account also needs bucket access. `--preflight` prints these and
 never runs them:
 
 ```bash
-SA=pytc-trainer@sunny-catalyst-506019-a2.iam.gserviceaccount.com
+SA=pytc-trainer@<your-gcp-project>.iam.gserviceaccount.com
 gcloud storage buckets add-iam-policy-binding gs://donglai_public \
   --member=serviceAccount:$SA --role=roles/storage.objectAdmin
 gcloud storage buckets add-iam-policy-binding gs://donglai \
@@ -138,7 +138,7 @@ gcloud storage buckets add-iam-policy-binding gs://donglai \
 ```
 
 The VM runs unattended, so **the service account is the only identity available** —
-there is no interactive `gcloud auth login` on it, and `donglai@mindspan.org` being
+there is no interactive `gcloud auth login` on it, and `<your-gcloud-account>` being
 able to read and write proves nothing about whether the run can. `objectAdmin` on
 `donglai_public` covers both reading the source group and writing results, which is
 why one grant satisfies two preflight rows.

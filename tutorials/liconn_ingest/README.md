@@ -174,8 +174,7 @@ vignetting correction.
 
 Step-by-step walkthrough with figures:
 [`../liconn_preprocess/README.md`](../liconn_preprocess/README.md).
-Why it replaced the legacy recipe (evidence and figures in the Google Doc
-"LICONN intensity normalization"): on ExPID96 the fixed 120–350 clip saturated
+Why it replaced the legacy recipe: on ExPID96 the fixed 120–350 clip saturated
 7.9% of pixels, the synapse/vesicle tail; per-plane p99 still flattens puncta
 peaks; CLAHE raises sharpness at the defocused tile border to match the center
 by amplifying noise; and per-plane statistics leave every volume on its own

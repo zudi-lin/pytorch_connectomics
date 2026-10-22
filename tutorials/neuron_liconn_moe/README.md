@@ -405,7 +405,7 @@ reader following it would have looked in the wrong bucket.
    without it.
 
 **Uploading needs an interactive login and cannot be done from a compute node.**
-`gcloud`'s refresh token for `donglai@mindspan.org` expires and can only be
+`gcloud`'s refresh token for `<your-gcloud-account>` expires and can only be
 renewed by a browser flow — and that is the only identity available here, since
 there is no ADC on this host (so CloudVolume / igneous / tensorstore cannot
 authenticate at all). Write access to `donglai_public` for that account has not
