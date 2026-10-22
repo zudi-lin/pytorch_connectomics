@@ -1,0 +1,9 @@
+# Install once per clone: pip install pre-commit && pre-commit install
+# CI enforces the same 1 MB limit over every commit in a push/PR
+# (.github/workflows/tests.yml, job `large-files`).
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]

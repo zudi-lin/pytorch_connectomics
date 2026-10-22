@@ -63,6 +63,7 @@ extras_require = {
     "dev": [
         "pytest>=6.0.0",
         "pytest-benchmark>=3.4.0",
+        "pre-commit>=3.0.0",
     ],
     # Documentation build
     "docs": [

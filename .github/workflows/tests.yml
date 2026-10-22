@@ -43,6 +43,42 @@ jobs:
         flags: unittests
         name: codecov-${{ matrix.os }}-py${{ matrix.python-version }}
 
+  large-files:
+    # Checks every blob added in the pushed/PR commits, not just the tip, so a
+    # file committed and later deleted in the same push still fails.
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Reject blobs over 1 MB
+      shell: bash
+      env:
+        MAX_BYTES: 1048576
+        BEFORE: ${{ github.event.before }}
+        EVENT_NAME: ${{ github.event_name }}
+        BASE_REF: ${{ github.base_ref }}
+      run: |
+        set -euo pipefail
+        if [[ "$EVENT_NAME" == "pull_request" ]]; then
+          range="origin/$BASE_REF..HEAD"
+        elif [[ -n "$BEFORE" && ! "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE" 2>/dev/null; then
+          range="$BEFORE..HEAD"
+        else
+          range="HEAD~1..HEAD"
+        fi
+        big=$(git rev-list --objects $range \
+          | git cat-file --batch-check='%(objecttype) %(objectsize) %(rest)' \
+          | awk -v max="$MAX_BYTES" '$1=="blob" && $2>max {s=$2; sub(/^[^ ]+ [^ ]+ /, ""); printf "%8.1f MB  %s\n", s/1048576, $0}')
+        if [[ -n "$big" ]]; then
+          echo "Files over 1 MB added in $range:"
+          echo "$big"
+          echo "Keep checkpoints, volumes and run outputs out of git (see .gitignore)."
+          exit 1
+        fi
+        echo "No blobs over 1 MB in $range."
+
   lint:
     runs-on: ubuntu-latest
     steps:
